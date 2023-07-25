@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "124622173320",
+    "project_id": "tradeiq-3a498",
+    "storage_bucket": "tradeiq-3a498.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:124622173320:android:ee63402ca77c5241295b3d",
+        "android_client_info": {
+          "package_name": "com.example.tradeiq"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "124622173320-d6sq1o867vcqrrm5m59iqrcj3948ilam.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkjJkr8hue33IpyATAH_I3rAWwTsWssk0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124622173320-d6sq1o867vcqrrm5m59iqrcj3948ilam.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

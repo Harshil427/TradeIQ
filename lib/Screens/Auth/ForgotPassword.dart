@@ -2,9 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:tradeiq/Services/Auth_Services.dart';
 
 import '../../Constants/Colors.dart';
 import '../../Widgets/LogoAndComponents.dart';
+import '../../Widgets/SnackBar.dart';
 import '../../Widgets/Style.dart';
 
 class ForgotPassword extends StatefulWidget {
@@ -34,12 +36,13 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 40,
-                    fontFamily: 'Raleway',
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: 100, child: buildLogoWidget()), // Display the logo
-                SvgPicture.asset('Assets/SVG/forgotPassword.svg', height: height * .4),
+                SizedBox(
+                    height: 100, child: buildLogoWidget()), // Display the logo
+                SvgPicture.asset('Assets/SVG/forgotPassword.svg',
+                    height: height * .4),
                 SizedBox(
                   height: 10,
                 ),
@@ -52,7 +55,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     style: TextStyle(
                       color: Color(0xFFD8D8D8),
                       fontSize: 22,
-                      fontFamily: 'Raleway',
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -69,7 +71,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       SizedBox(
                         height: 20,
                       ),
-                      _buildSentEmailButton(),
+                      _buildSentEmailButton(context),
                     ],
                   ),
                 ),
@@ -92,12 +94,23 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     );
   }
 
-  Widget _buildSentEmailButton() {
+  Widget _buildSentEmailButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: () {}, // Add the function to handle the email sending logic
+        onPressed: () {
+          if (_emailController.text.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Please enter your email'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else {
+            sentResetEmail(context);
+          }
+        },
         child: Text(
           'SENT EMAIL',
           style: TextStyle(
@@ -115,5 +128,34 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         ),
       ),
     );
+  }
+
+  void sentResetEmail(BuildContext context) {
+    String email = _emailController.text.trim();
+
+    // Add the function to handle the email sending logic
+    Future<String> res = AuthServices().resetPassword(email);
+
+    res.then((result) {
+      if (result == 'Success') {
+        showSnackBarSuccess(
+          'Success',
+          'Password reset email sent successfully.',
+          context,
+        );
+      } else {
+        showSnackBarfail(
+          'Error',
+          result,
+          context,
+        );
+      }
+    }).catchError((error) {
+      showSnackBarfail(
+        'Error',
+        error.toString(),
+        context,
+      );
+    });
   }
 }

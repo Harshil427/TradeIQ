@@ -1,13 +1,16 @@
-// ignore_for_file: prefer_const_constructors, sort_child_properties_last, file_names
+// ignore_for_file: prefer_const_constructors, sort_child_properties_last, file_names, unrelated_type_equality_checks
 
 import 'package:flutter/material.dart';
 import 'package:tradeiq/Screens/Auth/ForgotPassword.dart';
 import 'package:tradeiq/Screens/Auth/SignUp_Screen.dart';
+import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Utils/Functions.dart';
+import 'package:tradeiq/Widgets/SnackBar.dart';
 
 import '../../Constants/Colors.dart';
 import '../../Widgets/Style.dart';
 import '../../Widgets/LogoAndComponents.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -21,19 +24,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
-
-  void _login() {
-    if (_formKey.currentState!.validate()) {
-      // Form is valid, continue with login process
-      String email = _emailController.text.trim();
-      String password = _passwordController.text;
-
-      // Add your login logic here, e.g., authenticate user
-      // and navigate to the next screen if login is successful.
-    } else {
-      // Form is invalid, show validation errors
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +125,9 @@ class _LoginScreenState extends State<LoginScreen> {
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: _login, // Call the _login function on button press
+        onPressed: () {
+          _login(context);
+        },
         child: Text(
           'LOGIN',
           style: TextStyle(
@@ -208,5 +200,38 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void _login(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      String email = _emailController.text.trim();
+      String password = _passwordController.text;
+
+      Future<String> res = AuthServices().login(email, password);
+
+      res.then((result) {
+        if (result == 'Success') {
+          showSnackBarSuccess(
+            'Success',
+            'Login Successful',
+            context,
+          );
+        } else {
+          showSnackBarfail(
+            'Error',
+            result,
+            context,
+          );
+        }
+      }).catchError((error) {
+        showSnackBarfail(
+          'Error',
+          error.toString(),
+          context,
+        );
+      });
+    } else {
+      // Form is invalid, show validation errors
+    }
   }
 }

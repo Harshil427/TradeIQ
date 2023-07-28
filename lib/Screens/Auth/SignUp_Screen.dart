@@ -1,8 +1,11 @@
-// ignore_for_file: prefer_const_constructors, sort_child_properties_last, file_names
+// ignore_for_file: prefer_const_constructors, sort_child_properties_last, file_names, unrelated_type_equality_checks
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:tradeiq/Screens/Auth/Login_screen.dart';
+import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Utils/Functions.dart';
+import 'package:tradeiq/Widgets/SnackBar.dart';
 
 import '../../Constants/Colors.dart';
 import '../../Widgets/Style.dart';
@@ -27,17 +30,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _signUp() {
     if (_formKey.currentState!.validate()) {
-      // Form is valid, continue with sign-up process
-      String email = _emailController.text.trim();
+      String email = _emailController.text;
       String password = _passwordController.text;
       String confirmPassword = _confirmPasswordController.text;
 
       if (password == confirmPassword) {
-        // Add your sign-up logic here
-        // and navigate to the next screen if sign-up is successful.
+        Future<String> res = AuthServices().signUp(email, password);
+
+        res.then((result) {
+          if (result == 'Success') {
+            showSnackBarSuccess(
+              'Success',
+              result,
+              context,
+            );
+          } else {
+            showSnackBarfail(
+              'Error',
+              result,
+              context,
+            );
+          }
+        }).catchError((error) {
+          showSnackBarfail(
+            'Error',
+            error.toString(),
+            context,
+          );
+        });
       } else {
-        // Show an error message that passwords do not match
-        // or take appropriate action.
+        showSnackBarfail(
+          'Error',
+          'Password and confirm password do not match',
+          context,
+        );
       }
     } else {
       // Form is invalid, show validation errors

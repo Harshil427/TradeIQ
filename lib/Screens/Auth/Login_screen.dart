@@ -1,8 +1,10 @@
 // ignore_for_file: prefer_const_constructors, sort_child_properties_last, file_names, unrelated_type_equality_checks
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:tradeiq/Screens/Auth/ForgotPassword.dart';
 import 'package:tradeiq/Screens/Auth/SignUp_Screen.dart';
+import 'package:tradeiq/Screens/dashboard/HomeScreen.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Utils/Functions.dart';
 import 'package:tradeiq/Widgets/SnackBar.dart';
@@ -10,7 +12,6 @@ import 'package:tradeiq/Widgets/SnackBar.dart';
 import '../../Constants/Colors.dart';
 import '../../Widgets/Style.dart';
 import '../../Widgets/LogoAndComponents.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -24,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -122,28 +124,35 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildLoginButton() {
     return SizedBox(
-      width: double.infinity,
+      width: _isLoading ? 50 : double.infinity,
       height: 50,
-      child: ElevatedButton(
-        onPressed: () {
-          _login(context);
-        },
-        child: Text(
-          'LOGIN',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.black,
-          backgroundColor: Color.fromARGB(143, 189, 134, 206),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-      ),
+      child: _isLoading
+          ? CircularProgressIndicator(
+              color: proccessIndicator,
+            )
+          : ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _isLoading = true;
+                });
+                _login(context);
+              },
+              child: Text(
+                'LOGIN',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.black,
+                backgroundColor: Color.fromARGB(143, 189, 134, 206),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
     );
   }
 
@@ -211,12 +220,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
       res.then((result) {
         if (result == 'Success') {
-          showSnackBarSuccess(
-            'Success',
-            'Login Successful',
-            context,
+          setState(() {
+            _isLoading = false;
+          });
+          Get.offAll(
+            HomeScreen(),
           );
         } else {
+          setState(() {
+            _isLoading = false;
+          });
           showSnackBarfail(
             'Error',
             result,
@@ -224,6 +237,9 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       }).catchError((error) {
+        setState(() {
+          _isLoading = false;
+        });
         showSnackBarfail(
           'Error',
           error.toString(),
@@ -231,7 +247,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       });
     } else {
-      // Form is invalid, show validation errors
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 }

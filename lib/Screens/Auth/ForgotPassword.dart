@@ -1,8 +1,10 @@
-// ignore_for_file: sort_child_properties_last, prefer_const_constructors
+// ignore_for_file: sort_child_properties_last, prefer_const_constructors, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:tradeiq/Screens/Auth/Login_screen.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
+import 'package:tradeiq/Utils/Functions.dart';
 
 import '../../Constants/Colors.dart';
 import '../../Widgets/LogoAndComponents.dart';
@@ -18,6 +20,7 @@ class ForgotPassword extends StatefulWidget {
 
 class _ForgotPasswordState extends State<ForgotPassword> {
   final _emailController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +44,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 ),
                 SizedBox(
                     height: 100, child: buildLogoWidget()), // Display the logo
-                SvgPicture.asset('Assets/SVG/forgotPassword.svg',
-                    height: height * .4),
+                SvgPicture.asset(
+                  'Assets/SVG/forgotPassword.svg',
+                  height: height * .4,
+                ),
                 SizedBox(
                   height: 10,
                 ),
@@ -96,54 +101,77 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
   Widget _buildSentEmailButton(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
+      width: _isLoading ? 50 : double.infinity,
       height: 50,
-      child: ElevatedButton(
-        onPressed: () {
-          if (_emailController.text.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Please enter your email'),
-                backgroundColor: Colors.red,
+      child: _isLoading
+          ? CircularProgressIndicator(
+              color: proccessIndicator,
+            )
+          : ElevatedButton(
+              onPressed: () {
+                if (_emailController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Please enter your email'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                } else {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  sentResetEmail(context);
+                }
+              },
+              child: Text(
+                'SENT EMAIL',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            );
-          } else {
-            sentResetEmail(context);
-          }
-        },
-        child: Text(
-          'SENT EMAIL',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.black,
-          backgroundColor: Color.fromARGB(143, 189, 134, 206),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-      ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.black,
+                backgroundColor: Color.fromARGB(143, 189, 134, 206),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
     );
   }
 
   void sentResetEmail(BuildContext context) {
     String email = _emailController.text.trim();
 
-    // Add the function to handle the email sending logic
     Future<String> res = AuthServices().resetPassword(email);
 
-    res.then((result) {
+    res.then((result) async {
       if (result == 'Success') {
+        setState(() {
+          _isLoading = false;
+        });
         showSnackBarSuccess(
           'Success',
           'Password reset email sent successfully.',
           context,
         );
+        await Future.delayed(Duration(seconds: 3)).then((value) {
+          showSnackBarHelp(
+            'Info',
+            'You Can Login After Change Password',
+            context,
+          );
+          moveNextPage(
+            context,
+            LoginScreen(),
+          );
+        });
       } else {
+        setState(() {
+          _isLoading = false;
+        });
         showSnackBarfail(
           'Error',
           result,
@@ -151,6 +179,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         );
       }
     }).catchError((error) {
+      setState(() {
+        _isLoading = false;
+      });
       showSnackBarfail(
         'Error',
         error.toString(),

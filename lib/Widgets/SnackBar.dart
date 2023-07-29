@@ -26,6 +26,9 @@ showSnackBarSuccess(String title, String message, BuildContext context) {
     /// need to set following properties for best effect of awesome_snackbar_content
     elevation: 0,
     backgroundColor: Colors.transparent,
+    duration: const Duration(
+      seconds: 2,
+    ),
     // forceActionsBelow: false,
     // forceActionsBelow: true,
     content: AwesomeSnackbarContent(
@@ -34,6 +37,30 @@ showSnackBarSuccess(String title, String message, BuildContext context) {
 
       /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
       contentType: ContentType.success,
+      // to configure for material banner
+      inMaterialBanner: true,
+    ),
+    // actions: const [SizedBox.shrink()],
+  );
+
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(snackBar);
+}
+
+showSnackBarHelp(String title, String message, BuildContext context) {
+  final snackBar = SnackBar(
+    /// need to set following properties for best effect of awesome_snackbar_content
+    elevation: 0,
+    backgroundColor: Colors.transparent,
+    // forceActionsBelow: false,
+    // forceActionsBelow: true,
+    content: AwesomeSnackbarContent(
+      title: title,
+      message: message,
+
+      /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+      contentType: ContentType.help,
       // to configure for material banner
       inMaterialBanner: true,
     ),

@@ -57,6 +57,19 @@ class AuthServices {
 
   //Sign Out
 
+  Future<String> signOut() async {
+    String res = 'Some error...';
+
+    try {
+      await FirebaseAuth.instance.signOut();
+      res = 'Success';
+    } on FirebaseAuthException catch (e) {
+      res = e.code;
+    }
+
+    return res;
+  }
+
   //Reset Password
 
   Future<String> resetPassword(String email) async {

@@ -1,8 +1,9 @@
 // ignore_for_file: prefer_const_constructors, sort_child_properties_last, file_names, unrelated_type_equality_checks
 
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:tradeiq/Screens/Auth/Login_screen.dart';
+import 'package:tradeiq/Screens/dashboard/HomeScreen.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Utils/Functions.dart';
 import 'package:tradeiq/Widgets/SnackBar.dart';
@@ -27,6 +28,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+  bool _isLoading = false;
 
   void _signUp() {
     if (_formKey.currentState!.validate()) {
@@ -39,12 +41,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         res.then((result) {
           if (result == 'Success') {
-            showSnackBarSuccess(
-              'Success',
-              result,
-              context,
+            setState(() {
+              _isLoading = false;
+            });
+
+            Get.offAll(
+              HomeScreen(),
             );
           } else {
+            setState(() {
+              _isLoading = false;
+            });
             showSnackBarfail(
               'Error',
               result,
@@ -52,6 +59,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             );
           }
         }).catchError((error) {
+          setState(() {
+            _isLoading = false;
+          });
           showSnackBarfail(
             'Error',
             error.toString(),
@@ -59,6 +69,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
         });
       } else {
+        setState(() {
+          _isLoading = false;
+        });
         showSnackBarfail(
           'Error',
           'Password and confirm password do not match',
@@ -66,7 +79,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         );
       }
     } else {
-      // Form is invalid, show validation errors
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -196,26 +211,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Widget _buildSignUpButton() {
     return SizedBox(
-      width: double.infinity,
+      width: _isLoading ? 50 : double.infinity,
       height: 50,
-      child: ElevatedButton(
-        onPressed: _signUp, // Call the _signUp function on button press
-        child: Text(
-          'SIGN UP',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.black,
-          backgroundColor: Color.fromARGB(143, 189, 134, 206),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-      ),
+      child: _isLoading
+          ? CircularProgressIndicator(
+            color: proccessIndicator,
+          )
+          : ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _isLoading = true;
+                });
+                _signUp();
+              },
+              child: Text(
+                'SIGN UP',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.black,
+                backgroundColor: Color.fromARGB(143, 189, 134, 206),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    20,
+                  ),
+                ),
+              ),
+            ),
     );
   }
 

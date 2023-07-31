@@ -43,6 +43,11 @@ dependencies:
   get: ^4.6.5
   flutter_svg: ^2.0.7
   awesome_snackbar_content: ^0.1.3
+  persistent_bottom_nav_bar: ^5.0.2
+  scroll_to_hide: ^1.0.5
+  flutter_screenutil: ^5.8.4
+  flutter_slidable: ^3.0.0
+  provider: ^6.0.5
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +76,8 @@ flutter:
     - Assets/Images/UI/Intro/
     - Assets/Images/UI/Componants/
     - Assets/SVG/
+    - Assets/SVG/Icon/
+    - Assets/Images/icons/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -84,11 +91,28 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
+  fonts:
+    - family: Raleway
+      fonts:
+        - asset: Assets/Fonts/Raleway/static/Raleway-Thin.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-ExtraLight.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-Light.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-Regular.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-Medium.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-SemiBold.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-Bold.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-ExtraBold.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-Black.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-ThinItalic.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-ExtraLightItalic.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-LightItalic.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-Italic.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-MediumItalic.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-SemiBoldItalic.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-BoldItalic.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-ExtraBoldItalic.ttf
+        - asset: Assets/Fonts/Raleway/static/Raleway-BlackItalic.ttf
+        
   #         style: italic
   #   - family: Trajan Pro
   #     fonts:

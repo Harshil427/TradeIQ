@@ -2,15 +2,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:provider/provider.dart';
 import 'package:tradeiq/Constants/Variable.dart';
 import 'package:tradeiq/Screens/Auth/Login_screen.dart';
 import 'package:tradeiq/Screens/Start/Intro.dart';
-import 'package:tradeiq/Screens/dashboard/HomeScreen.dart';
+
+import '../Demo/DemoNav.dart';
+// import '../Provider/Variable.dart';
 
 class AuthWrapper extends StatelessWidget {
   Widget _getScreenBasedOnAuthStatus(User? user) {
     if (user != null) {
-      return HomeScreen();
+      return BottomNavigator();
     } else {
       if (moveFromSignOut) {
         return LoginScreen();
@@ -22,17 +25,22 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // final navBarVisibility = Provider.of<NavBarVisibility>(
+    //   context,
+    //   listen: false,
+    // );
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
-        if (snapshot.connectionState == ConnectionState.active) {
-          return _getScreenBasedOnAuthStatus(snapshot.data);
-        } else {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             body: Center(
-              child: const CircularProgressIndicator(),
+              child: CircularProgressIndicator(),
             ),
           );
+        } else {
+          // navBarVisibility.setVisible(true);
+          return _getScreenBasedOnAuthStatus(snapshot.data);
         }
       },
     );

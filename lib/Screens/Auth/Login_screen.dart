@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tradeiq/Screens/Auth/ForgotPassword.dart';
 import 'package:tradeiq/Screens/Auth/SignUp_Screen.dart';
-import 'package:tradeiq/Screens/dashboard/HomeScreen.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Utils/Functions.dart';
 import 'package:tradeiq/Widgets/SnackBar.dart';
@@ -12,6 +11,7 @@ import 'package:tradeiq/Widgets/SnackBar.dart';
 import '../../Constants/Colors.dart';
 import '../../Widgets/Style.dart';
 import '../../Widgets/LogoAndComponents.dart';
+import '../dashboard/BottomNavigtor.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -213,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _login(BuildContext context) {
     if (_formKey.currentState!.validate()) {
-      String email = _emailController.text.trim();
+      String email = _emailController.text;
       String password = _passwordController.text;
 
       Future<String> res = AuthServices().login(email, password);
@@ -224,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
             _isLoading = false;
           });
           Get.offAll(
-            HomeScreen(),
+            BottomNavigator(),
           );
         } else {
           setState(() {

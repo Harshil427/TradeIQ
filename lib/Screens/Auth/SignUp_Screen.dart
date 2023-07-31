@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tradeiq/Screens/Auth/Login_screen.dart';
-import 'package:tradeiq/Screens/dashboard/HomeScreen.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Utils/Functions.dart';
 import 'package:tradeiq/Widgets/SnackBar.dart';
@@ -11,6 +10,7 @@ import 'package:tradeiq/Widgets/SnackBar.dart';
 import '../../Constants/Colors.dart';
 import '../../Widgets/Style.dart';
 import '../../Widgets/LogoAndComponents.dart';
+import '../dashboard/BottomNavigtor.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -25,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -37,7 +38,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       String confirmPassword = _confirmPasswordController.text;
 
       if (password == confirmPassword) {
-        Future<String> res = AuthServices().signUp(email, password);
+        Future<String> res = AuthServices().signUp(
+          email,
+          _nameController.text,
+          password,
+        );
 
         res.then((result) {
           if (result == 'Success') {
@@ -46,7 +51,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             });
 
             Get.offAll(
-              HomeScreen(),
+              BottomNavigator(),
             );
           } else {
             setState(() {
@@ -101,7 +106,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  buildLogoSection(),
+                  buildLogoWidget(),
                   SizedBox(height: 20),
                   _welComeText(),
                   Container(
@@ -109,6 +114,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     width: width * .8,
                     child: Column(
                       children: [
+                        _buildNameTextField(),
+                        SizedBox(height: 20),
                         _buildEmailTextField(),
                         SizedBox(height: 10),
                         _buildPasswordTextField(),
@@ -146,6 +153,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
           return 'Please enter your email';
         }
         // You can also add more complex email validation here if needed
+        return null;
+      },
+    );
+  }
+
+  Widget _buildNameTextField() {
+    return TextFormField(
+      controller: _nameController,
+      keyboardType: TextInputType.text,
+      decoration: authInputField.copyWith(
+        labelText: 'Name',
+        prefixIcon: Icon(Icons.person),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your name';
+        }
         return null;
       },
     );
@@ -215,8 +239,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       height: 50,
       child: _isLoading
           ? CircularProgressIndicator(
-            color: proccessIndicator,
-          )
+              color: proccessIndicator,
+            )
           : ElevatedButton(
               onPressed: () {
                 setState(() {

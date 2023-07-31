@@ -1,8 +1,11 @@
 // ignore_for_file: avoid_print, file_names
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tradeiq/Services/DatabaseServices.dart';
 
 class AuthServices {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   //LOGIN
 
   Future<String> login(String emailAddress, String password) async {
@@ -12,6 +15,10 @@ class AuthServices {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailAddress,
         password: password,
+      );
+
+      DatabaseServices().fetchUserData(
+        _auth.currentUser!.uid,
       );
 
       res = 'Success';
@@ -30,7 +37,8 @@ class AuthServices {
 
   //Sign Up
 
-  Future<String> signUp(String emailAddress, String password) async {
+  Future<String> signUp(
+      String emailAddress, String name, String password) async {
     String res = 'Some Error...';
 
     try {
@@ -38,7 +46,18 @@ class AuthServices {
         email: emailAddress,
         password: password,
       );
+
+      DatabaseServices().storeNameOfUser(
+        _auth.currentUser!.uid,
+        name,
+        emailAddress,
+      );
+
       res = 'Success';
+      DatabaseServices().fetchUserData(
+        _auth.currentUser!.uid,
+      );
+      
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
@@ -85,5 +104,9 @@ class AuthServices {
     }
 
     return res;
+  }
+
+  getUid(){
+    return _auth.currentUser!.uid;
   }
 }

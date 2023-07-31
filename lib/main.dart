@@ -1,8 +1,11 @@
-// ignore_for_file: prefer_const_constructors
+// main.dart
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+
+import 'Provider/Variable.dart';
 import 'Services/CheckAuthServices.dart';
 import 'firebase_options.dart';
 
@@ -16,15 +19,25 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Flutter Demo',
+      title: 'TradeIQ',
       theme: ThemeData.dark(
         useMaterial3: true,
       ),
-      home: AuthWrapper(),
+      debugShowCheckedModeBanner: false,
+      home: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (_) => NavBarVisibility(),
+          ),
+        ],
+        child:
+            AuthWrapper(), // Assuming AuthWrapper handles the authentication flow
+      ),
     );
   }
 }

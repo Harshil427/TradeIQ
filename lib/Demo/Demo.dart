@@ -1,65 +1,86 @@
-// ignore_for_file: library_private_types_in_public_api, use_key_in_widget_constructors, prefer_const_constructors, unused_field
+// ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:expandable/expandable.dart';
 
-void main() {
-  runApp(MyApp());
-}
+class NewsCard extends StatelessWidget {
+  final String imageUrl;
+  final String title;
+  final String content;
+  final String source;
 
-class MyApp extends StatelessWidget {
+  const NewsCard({
+    required this.imageUrl,
+    required this.title,
+    required this.content,
+    required this.source,
+    Key? key,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Hide/Show Navigation Bar'),
+    return Card(
+      elevation: 2, // Add a slight elevation for a visual lift
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5), // Add margins for spacing
+      child: Padding(
+        padding: const EdgeInsets.all(8.0), // Add padding within the card
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Use AspectRatio to maintain the image's aspect ratio
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(width: 10), // Add spacing between image and content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 5), // Add spacing between title and content
+                  ExpandablePanel(
+                    header: Text(
+                      "Read more", // Add a header indicating expandability
+                      style: TextStyle(
+                        color: Colors.blue, // Use a different color for the header
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    collapsed: Text(
+                      content,
+                      softWrap: true,
+                      maxLines: 2, // Show a few lines in collapsed state
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    expanded: Text(
+                      content,
+                      softWrap: true,
+                    ),
+                  ),
+                  SizedBox(height: 5), // Add spacing below content
+                  Text(
+                    source,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        body: ScrollHideNavBar(),
       ),
-    );
-  }
-}
-
-class ScrollHideNavBar extends StatefulWidget {
-  @override
-  _ScrollHideNavBarState createState() => _ScrollHideNavBarState();
-}
-
-class _ScrollHideNavBarState extends State<ScrollHideNavBar> {
-  late ScrollController _scrollController;
-  bool _isVisible = true;
-  double _scrollPosition = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(() {
-      setState(() {
-        _isVisible =
-            _scrollController.position.userScrollDirection == ScrollDirection.forward;
-        _scrollPosition = _scrollController.position.pixels;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      controller: _scrollController,
-      itemCount: 100, // Replace this with your actual list size
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text('Item $index'),
-        );
-      },
     );
   }
 }

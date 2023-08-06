@@ -8,6 +8,7 @@ class User {
   String email;
   List<String> favorites;
   List<String> alerts;
+  String? profileImage; // Making the profileImage property optional
 
   User({
     required this.uid,
@@ -15,6 +16,7 @@ class User {
     required this.email,
     required this.favorites,
     required this.alerts,
+    this.profileImage, // Making profileImage optional with a default value of null
   });
 
   // Create a factory method to convert a map (usually from Firestore) to a User object
@@ -24,6 +26,7 @@ class User {
       uid: map['uid'],
       name: map['name'],
       email: map['email'],
+      profileImage: '',
       favorites: List<String>.from(map['favorites']),
       alerts: List<String>.from(map['alerts']),
     );
@@ -37,6 +40,7 @@ class User {
       'email': email,
       'favorites': favorites,
       'alerts': alerts,
+      'profileImage': profileImage, // Include profileImage in the map if it exists
     };
   }
 }

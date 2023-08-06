@@ -1,7 +1,10 @@
-// ignore_for_file: file_names, prefer_const_constructors, sort_child_properties_last
+// ignore_for_file: file_names, prefer_const_constructors, sort_child_properties_last, no_leading_underscores_for_local_identifiers
+
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tradeiq/Screens/Auth/Login_screen.dart';
 
@@ -77,4 +80,17 @@ moveNextPagePop(BuildContext context, Widget page) {
     context,
     MaterialPageRoute(builder: (context) => page),
   );
+}
+
+pickImage(ImageSource source) async {
+  final ImagePicker _imagePicker = ImagePicker();
+
+  XFile? _file = await _imagePicker.pickImage(source: source);
+
+  if (_file != null) {
+    return await _file.readAsBytes();
+  }
+
+  print('No image selected');
+  return Uint8List(0);
 }

@@ -8,8 +8,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 // import 'package:provider/provider.dart';
 import 'package:tradeiq/Constants/Colors.dart';
 import 'package:tradeiq/Module/User.dart';
+import 'package:tradeiq/Screens/Tools/Edit_ProfileScreen.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Services/DatabaseServices.dart';
+import 'package:tradeiq/Utils/Functions.dart';
 // import 'package:tradeiq/Constants/Variable.dart';
 
 import '../../Constants/Variable.dart';
@@ -209,7 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // controller: _scrollController,
         child: Column(
           children: [
-            buildUserProfileSection(),
+            buildUserProfileSection(context),
             Divider(),
             buildUserSectionBody(),
             Divider(),
@@ -227,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget buildUserProfileSection() {
+  Widget buildUserProfileSection(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
 
     return Padding(
@@ -238,10 +240,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           CircleAvatar(
             radius: 25,
             foregroundColor: Colors.white,
-            child: Icon(
-              Icons.person,
-              color: Colors.white,
-            ),
+            backgroundImage: _userData != null &&
+                    _userData!.profileImage != null &&
+                    _userData!.profileImage!.isNotEmpty
+                ? NetworkImage(
+                    'https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
+                  )
+                : null,
+            // child: _userData != null &&
+            //         (_userData!.profileImage == null ||
+            //             _userData!.profileImage!.isEmpty)
+            //     ? Icon(
+            //         Icons.person,
+            //         color: Colors.white,
+            //       )
+            //     : null,
           ),
           Text(
             _userData != null ? '${_userData!.name}' : 'Loading user data...',
@@ -266,7 +279,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               IconButton(
                 onPressed: () {
-                  // Add your Edit button logic here
+                  moveNextPage(
+                    context,
+                    EditProfileScreen(),
+                  );
                 },
                 icon: Icon(
                   Icons.edit,
@@ -504,5 +520,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
 }

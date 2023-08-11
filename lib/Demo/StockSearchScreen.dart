@@ -19,7 +19,7 @@ class _StockSearchScreenState extends State<StockSearchScreen> {
   Future<void> _searchStocks(String query) async {
     // Make API request to Finnhub to fetch matching stocks
     // Use your own API key from Finnhub
-    final apiKey = apiFinnhub;
+    const apiKey = apiFinnhub;
     final url = 'https://finnhub.io/api/v1/search?q=$query&token=$apiKey';
 
     final response = await http.get(Uri.parse(url));

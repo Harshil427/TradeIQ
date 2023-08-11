@@ -1,13 +1,13 @@
 // ignore_for_file: file_names, prefer_const_constructors, avoid_print
 
-import 'dart:io';
+// import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+// import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:tradeiq/Constants/Colors.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Services/DatabaseServices.dart';

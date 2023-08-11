@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:tradeiq/Constants/Colors.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Services/DatabaseServices.dart';
+import 'package:tradeiq/Services/TradingViewServices.dart';
 import '../../Module/User.dart';
+import '../Tools/TradingViewChart.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,12 +14,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  User? _userData; 
+  User? _userData;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserData(); 
+    _fetchUserData();
   }
 
   void _fetchUserData() async {
@@ -30,6 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final heigth = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(

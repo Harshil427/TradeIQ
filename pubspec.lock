@@ -390,7 +390,7 @@ packages:
     source: hosted
     version: "0.2.1"
   intl:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: intl
       sha256: a3715e3bc90294e971cb7dc063fbf3cd9ee0ebf8604ffeafabd9e6f16abbdbe6
@@ -554,6 +554,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  syncfusion_flutter_charts:
+    dependency: "direct main"
+    description:
+      name: syncfusion_flutter_charts
+      sha256: "0c64cc88ed359e9837f446606240efaab756c9c78834e5f10e6c6b31292d6fe4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "22.2.7"
+  syncfusion_flutter_core:
+    dependency: transitive
+    description:
+      name: syncfusion_flutter_core
+      sha256: ee86a4531180216d0229ac83db2b3b8428ad4e2fd5f4aff28b89a5aed149bb55
+      url: "https://pub.dev"
+    source: hosted
+    version: "22.2.7"
   term_glyph:
     dependency: transitive
     description:
@@ -650,6 +666,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.3.0"
+  zoom_widget:
+    dependency: "direct main"
+    description:
+      name: zoom_widget
+      sha256: "50fbaa460ffc938ca14c0077f8c9e5968c437897242d7f552dacff1bf3270225"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
 sdks:
   dart: ">=3.0.6 <4.0.0"
   flutter: ">=3.10.0"

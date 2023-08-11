@@ -53,6 +53,9 @@ dependencies:
   fl_chart: ^0.63.0
   expandable: ^5.0.1
   webview_flutter: ^4.2.2
+  intl: ^0.18.0
+  syncfusion_flutter_charts: ^22.2.7
+  zoom_widget: ^2.0.1
 
 dev_dependencies:
   flutter_test:

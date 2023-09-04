@@ -1,17 +1,13 @@
-// ignore_for_file: file_names, prefer_const_constructors, avoid_print
+// ignore_for_file: prefer_const_constructors, file_names, avoid_print, unnecessary_null_comparison
 
-// import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:tradeiq/Constants/Colors.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Services/DatabaseServices.dart';
-
 import '../../Utils/Functions.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -74,7 +70,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   AppBar buildAppBar() {
     return AppBar(
-      backgroundColor: backgroundColor, // Customize the color as needed.
+      backgroundColor: backgroundColor,
       title: Text(
         'Edit Profile',
         style: TextStyle(
@@ -84,10 +80,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
       ),
       leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back_ios_new,
-          size: 18,
-        ),
+        icon: Icon(Icons.arrow_back_ios_new, size: 18),
         onPressed: () {
           Navigator.pop(context);
         },
@@ -99,9 +92,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _isEditable = !_isEditable;
             });
           },
-          icon: Icon(
-            _isEditable ? Icons.check : Icons.edit,
-          ),
+          icon: Icon(_isEditable ? Icons.check : Icons.edit),
         ),
       ],
     );
@@ -125,7 +116,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             bottom: 0,
             child: IconButton(
               onPressed: () async {
-                pickImageFromGallery();
+                await pickImageFromGallery();
               },
               icon: Icon(
                 Icons.photo_library_outlined,
@@ -166,16 +157,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Future<Uint8List?> pickImageFromGallery() async {
+  Future<void> pickImageFromGallery() async {
     Uint8List pickedImage = await pickImage(ImageSource.gallery);
 
     if (pickedImage != null) {
-      DatabaseServices().changeUserProfileImage(
+      await DatabaseServices().changeUserProfileImage(
         pickedImage,
         AuthServices().getUid(),
       );
-      return Uint8List(0);
     }
-    return null;
   }
 }

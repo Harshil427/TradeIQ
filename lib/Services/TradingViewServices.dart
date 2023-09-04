@@ -1,47 +1,33 @@
 // ignore_for_file: file_names
 
-import 'package:flutter/material.dart';
-
 class TradingViewServices {
-  static String realTimeChart(String name) {
+  static String realTimeChart(String name, bool toolBar) {
     return '''
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-    <title>Load file or HTML string example</title>
-    </head>
-    <body>
-    <div class="tradingview-widget-container">
-    <div id="tradingview_4418d">
-    </div>
-    <div class="tradingview-widget-copyright">
-    <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">
-    <span class="blue-text">Track all markets on TradingView
-    </span>
-    </a>
-    </div>
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js">
-    </script>
-    <script type="text/javascript">
-    new TradingView.widget({
-      "width": "100%",
-      "height": 1800,
-      "symbol": "$name",
-      "interval": "D",
-      "timezone": "Etc/UTC",
-      "theme": "dark",
-      "style": "1",
-      "locale": "en",
-      "toolbar_bg": "#121536",
-      "backgroundColor": "rgba(18, 21, 54, 1)",
-      "enable_publishing": false,
-      "save_image": false,
-      "container_id": "tradingview_4418d"
-      });
-    </script>
-    </div>
-    </body>
-    </html>''';
+    <!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <div id="tradingview_add7d"></div>
+  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <script type="text/javascript">
+  new TradingView.widget(
+  {
+  "autosize": true,
+  "symbol": "$name",
+  "interval": "30",
+  "timezone": "Asia/Kolkata",
+  "theme": "dark",
+  "style": "2",
+  "locale": "in",
+  "enable_publishing": false,
+  "hide_top_toolbar": $toolBar,
+  "allow_symbol_change": true,
+  "hide_volume": true,
+  "container_id": "tradingview_add7d"
+}
+  );
+  </script>
+</div>
+<!-- TradingView Widget END -->''';
   }
 
   static String miniChartWidget(String name) {
@@ -49,7 +35,6 @@ class TradingViewServices {
 <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
   {
   "symbol": "$name",
@@ -71,7 +56,6 @@ class TradingViewServices {
     return '''
     <div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
   {
   "feedMode": "market",
@@ -93,7 +77,6 @@ class TradingViewServices {
     <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-info.js" async>
   {
   "symbol": "$name",
@@ -113,7 +96,6 @@ class TradingViewServices {
 <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
   {
   "symbol": "$name",
@@ -133,7 +115,6 @@ class TradingViewServices {
 <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-profile.js" async>
   {
   "width": "100%",
@@ -154,7 +135,6 @@ class TradingViewServices {
     <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
   {
   "interval": "15m",
@@ -177,7 +157,6 @@ class TradingViewServices {
       <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text"></span></a></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-financials.js" async>
   {
   "colorTheme": "dark",
@@ -200,7 +179,6 @@ class TradingViewServices {
     <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text"></span></a></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
   {
   "feedMode": "symbol",
@@ -248,7 +226,6 @@ class TradingViewServices {
       <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js" async>
   {
   "exchanges": [],
@@ -327,8 +304,7 @@ class TradingViewServices {
     <!-- TradingView Widget BEGIN -->
 <div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
-  <div class="tradingview-widget-copyright"><a href="https://in.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
-  <script type="text/javascript" src="lib/Demo/Cemo.js" async>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
   {
   "colorTheme": "dark",
   "dateRange": "1D",
@@ -476,6 +452,169 @@ class TradingViewServices {
 </div>
 <!-- TradingView Widget END -->
     
+    ''';
+  }
+
+  static String marketDataWidget() {
+    return '''
+        <!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <div class="tradingview-widget-container__widget"></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
+  {
+  "width": "100%",
+  "height": "100%",
+  "symbolsGroups": [
+    {
+      "name": "Indices",
+      "originalName": "Indices",
+      "symbols": [
+        {
+          "name": "FOREXCOM:SPXUSD",
+          "displayName": "S&P 500"
+        },
+        {
+          "name": "FOREXCOM:NSXUSD",
+          "displayName": "US 100"
+        },
+        {
+          "name": "FOREXCOM:DJI",
+          "displayName": "Dow 30"
+        },
+        {
+          "name": "INDEX:NKY",
+          "displayName": "Nikkei 225"
+        },
+        {
+          "name": "INDEX:DEU40",
+          "displayName": "DAX Index"
+        },
+        {
+          "name": "FOREXCOM:UKXGBP",
+          "displayName": "UK 100"
+        }
+      ]
+    },
+    {
+      "name": "Futures",
+      "originalName": "Futures",
+      "symbols": [
+        {
+          "name": "CME_MINI:ES1!",
+          "displayName": "S&P 500"
+        },
+        {
+          "name": "CME:6E1!",
+          "displayName": "Euro"
+        },
+        {
+          "name": "COMEX:GC1!",
+          "displayName": "Gold"
+        },
+        {
+          "name": "NYMEX:CL1!",
+          "displayName": "Oil"
+        },
+        {
+          "name": "NYMEX:NG1!",
+          "displayName": "Gas"
+        },
+        {
+          "name": "CBOT:ZC1!",
+          "displayName": "Corn"
+        }
+      ]
+    },
+    {
+      "name": "Bonds",
+      "originalName": "Bonds",
+      "symbols": [
+        {
+          "name": "CME:GE1!",
+          "displayName": "Eurodollar"
+        },
+        {
+          "name": "CBOT:ZB1!",
+          "displayName": "T-Bond"
+        },
+        {
+          "name": "CBOT:UB1!",
+          "displayName": "Ultra T-Bond"
+        },
+        {
+          "name": "EUREX:FGBL1!",
+          "displayName": "Euro Bund"
+        },
+        {
+          "name": "EUREX:FBTP1!",
+          "displayName": "Euro BTP"
+        },
+        {
+          "name": "EUREX:FGBM1!",
+          "displayName": "Euro BOBL"
+        }
+      ]
+    },
+    {
+      "name": "Forex",
+      "originalName": "Forex",
+      "symbols": [
+        {
+          "name": "FX:EURUSD",
+          "displayName": "EUR to USD"
+        },
+        {
+          "name": "FX:GBPUSD",
+          "displayName": "GBP to USD"
+        },
+        {
+          "name": "FX:USDJPY",
+          "displayName": "USD to JPY"
+        },
+        {
+          "name": "FX:USDCHF",
+          "displayName": "USD to CHF"
+        },
+        {
+          "name": "FX:AUDUSD",
+          "displayName": "AUD to USD"
+        },
+        {
+          "name": "FX:USDCAD",
+          "displayName": "USD to CAD"
+        }
+      ]
+    }
+  ],
+  "showSymbolLogo": true,
+  "colorTheme": "light",
+  "isTransparent": true,
+  "locale": "in"
+}
+  </script>
+</div>
+<!-- TradingView Widget END -->
+    ''';
+  }
+
+  static String economicCalendarWidget() {
+    return '''
+    <!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <div class="tradingview-widget-container__widget"></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+  {
+  "width": "100%",
+  "height": "100%",
+  "colorTheme": "dark",
+  "isTransparent": false,
+  "locale": "in",
+  "importanceFilter": "0,1",
+  "currencyFilter": "USD,EUR,ITL,NZD,CHF,AUD,FRF,JPY,ZAR,TRL,CAD,DEM,MXN,ESP,GBP"
+}
+  </script>
+</div>
+<!-- TradingView Widget END -->
     ''';
   }
 }

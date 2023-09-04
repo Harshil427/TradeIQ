@@ -1,32 +1,34 @@
-// ignore_for_file: avoid_print, prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_typing_uninitialized_variables, file_names, sort_child_properties_last, unused_import, unused_local_variable
+// ignore_for_file: file_names, prefer_const_constructors, avoid_print
 
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:tradeiq/Constants/Colors.dart';
 import 'package:tradeiq/Services/TradingViewServices.dart';
 import '../API/api.dart';
-import '../Demo/DemoCandle.dart';
+// import '../Demo/DemoCandle.dart';
 import '../Screens/Tools/RecommendationChart.dart';
 import '../Screens/Tools/TradingViewChart.dart';
+import 'TradingViewChart.dart';
 
 class StockProfileScreen extends StatefulWidget {
   final stock;
+
   const StockProfileScreen({
-    super.key,
+    Key? key,
     required this.stock,
-  });
+  }) : super(key: key);
 
   @override
-  State<StockProfileScreen> createState() => _StockProfileScreenState();
+  _StockProfileScreenState createState() => _StockProfileScreenState();
 }
 
 class _StockProfileScreenState extends State<StockProfileScreen> {
   Map<String, dynamic> companyData = {};
   Map<String, dynamic> stockQuoteData = {};
   var recommendationData = [];
-  Timer? _timer;
+  late Timer _timer;
 
   @override
   void initState() {
@@ -43,13 +45,14 @@ class _StockProfileScreenState extends State<StockProfileScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _timer.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+
     if (companyData.isEmpty) {
       return Center(
         child: CircularProgressIndicator(),
@@ -57,34 +60,30 @@ class _StockProfileScreenState extends State<StockProfileScreen> {
     }
 
     return Scaffold(
-      appBar: buildAppBar(),
+      appBar: _buildAppBar(),
       backgroundColor: backgroundColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            buildStockInfoContainer(width),
+            _buildStockInfoContainer(width),
             Divider(),
-            buildDetailsAboutCompany(),
+            // buildDetailsAboutCOH(),
             Divider(),
-            buildAnimationAreaDefault(
-              width,
-            ),
+            _buildAnimationAreaDefault(width),
             Divider(),
-            RecommendationChart(recommendationData),
+            _buildFullChartButton(),
             Divider(),
-            buildStockDataContainer(),
-            // Divider(),
-            buildAboutMoreStockContainer(),
-            SizedBox(
-              height: 30,
-            )
+            _buildStockDataContainer(),
+            Divider(),
+            _buildAboutMoreStockContainer(),
+            SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
 
-  AppBar buildAppBar() {
+  AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: backgroundColor,
       title: Text(
@@ -93,20 +92,26 @@ class _StockProfileScreenState extends State<StockProfileScreen> {
     );
   }
 
-  buildAnimationAreaDefault(double width) {
-    return SizedBox(
-      height: 328,
-      width: width * 0.9,
-      // child: Center(
-      //   child: Text('Work Pending'),
-      // ),
-      child: TradingViewWidgetHtml(
-        widget: TradingViewServices.miniChartWidget('NASDAQ:AAPL'),
+  Widget _buildStockInfoContainer(double width) {
+    return Container(
+      margin: EdgeInsets.all(20),
+      height: 100,
+      decoration: _buildContainerDecoration(),
+      child: Row(
+        children: [
+          SizedBox(width: 10),
+          _buildStockAvatar(),
+          SizedBox(width: 20),
+          _buildCompanyDetailsColumn(),
+          Spacer(),
+          _buildStockPriceText(),
+          SizedBox(width: 10),
+        ],
       ),
     );
   }
 
-  buildStockDataContainer() {
+  Container _buildStockDataContainer() {
     return Container(
       margin: EdgeInsets.all(20),
       child: Text.rich(
@@ -138,7 +143,7 @@ class _StockProfileScreenState extends State<StockProfileScreen> {
               ),
             ),
             TextSpan(
-              text: '${showIPOPrice()}',
+              text: '${_showIPOPrice()}',
               style: TextStyle(
                 color: Colors.grey[100],
                 fontFamily: 'Raleway',
@@ -160,27 +165,7 @@ class _StockProfileScreenState extends State<StockProfileScreen> {
     );
   }
 
-  Container buildStockPriceContainer() {
-    return Container(
-      margin: EdgeInsets.all(20),
-      height: 100,
-      decoration: buildContainerDecoration(),
-      child: buildStockPriceRow(),
-    );
-  }
-
-  buildStockPriceRow() {
-    return Row(
-      children: [
-        SizedBox(width: 10),
-        buildStockAvatar(),
-        SizedBox(width: 20),
-        buildCompanyDetailsColumn(),
-      ],
-    );
-  }
-
-  buildAboutMoreStockContainer() {
+  Container _buildAboutMoreStockContainer() {
     return Container(
       height: 200,
       margin: EdgeInsets.only(top: 20),
@@ -191,128 +176,45 @@ class _StockProfileScreenState extends State<StockProfileScreen> {
           topRight: Radius.circular(25),
         ),
       ),
+      child: Column(
+        children: [
+          SizedBox(height: 20),
+          _buildMoreOptionsRowCall(),
+          SizedBox(height: 20),
+          _buildRecommendationChart(),
+        ],
+      ),
     );
   }
 
-  buildStockInfoContainer(double width) {
+  ElevatedButton _buildFullChartButton() {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TradingViewChart(
+              stock: widget.stock,
+            ),
+          ),
+        );
+      },
+      child: Text('Show Full Chart'),
+    );
+  }
+
+  SizedBox _buildAnimationAreaDefault(double width) {
     return SizedBox(
+      height: 328,
       width: width * 0.9,
-      height: 150,
       child: TradingViewWidgetHtml(
-        widget:
-            TradingViewServices.singleTickerWidget('${widget.stock['symbol']}'),
-      ),
-    );
-    // return Container(
-    //   margin: EdgeInsets.all(20),
-    //   height: 100,
-    //   decoration: buildContainerDecoration(),
-    //   child: Row(
-    //     children: [
-    //       SizedBox(width: 10),
-    //       buildStockAvatar(),
-    //       SizedBox(width: 20),
-    //       buildCompanyDetailsColumn(),
-    //       Spacer(),
-    //       buildStockPriceText(),
-    //       SizedBox(width: 10),
-    //     ],
-    //   ),
-    // );
-  }
-
-  buildDetailsAboutCompany() {
-    return Container(
-      alignment: Alignment.centerLeft,
-      margin: EdgeInsets.all(20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            "High: ${stockQuoteData['h']}",
-            style: TextStyle(
-              color: Color.fromARGB(255, 43, 255, 0),
-              fontSize: 14,
-            ),
-          ),
-          Text(
-            "Open: ${stockQuoteData['o']}",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
-          ),
-          Text(
-            "Low: ${stockQuoteData['l']}",
-            style: TextStyle(
-              color: const Color.fromARGB(255, 255, 0, 0),
-              fontSize: 14,
-            ),
-          ),
-        ],
+        widget: TradingViewServices.miniChartWidget('NASDAQ:AAPL'),
       ),
     );
   }
 
-  buildStockPriceText() {
-    if (stockQuoteData.isNotEmpty) {
-      bool isLowOrNot =
-          stockQuoteData['o'] < stockQuoteData['c'] ? true : false;
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "\$ ${stockQuoteData['c']}",
-            style: TextStyle(
-              color: isLowOrNot ? Color.fromARGB(255, 47, 255, 0) : Colors.red,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Center(
-          // child: LinearProgressIndicator(),
-          );
-    }
-  }
-
-  ShapeDecoration buildContainerDecoration() {
-    return ShapeDecoration(
-      gradient: LinearGradient(
-        begin: Alignment(0.00, -1.00),
-        end: Alignment(0, 1),
-        colors: [
-          Color.fromARGB(255, 0, 255, 183),
-          Color.fromARGB(221, 3, 200, 255),
-        ],
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-    );
-  }
-
-  CircleAvatar buildStockAvatar() {
-    if (companyData['logo'] != null) {
-      return CircleAvatar(
-        child: SvgPicture.network(companyData['logo']),
-        radius: 25,
-      );
-    } else {
-      // Return a placeholder or alternative content if data is not available
-      return CircleAvatar(
-        radius: 30,
-        child: Icon(Icons.image), // Placeholder icon
-      );
-    }
-  }
-
-  Column buildCompanyDetailsColumn() {
-    return Column(
+  Row _buildCompanyDetailsColumn() {
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -325,6 +227,106 @@ class _StockProfileScreenState extends State<StockProfileScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildStockAvatar() {
+    if (companyData['logo'] != null) {
+      return CircleAvatar(
+        child: SvgPicture.network(companyData['logo']),
+        radius: 25,
+      );
+    } else {
+      return CircleAvatar(
+        radius: 30,
+        child: Icon(Icons.image),
+      );
+    }
+  }
+
+  Column _buildMoreOptionsColumn(String s, Color c, int value) {
+    return Column(
+      children: [
+        Text(
+          s,
+          style: TextStyle(
+            color: c,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          '$value',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMoreOptionsRow(Map<String, dynamic> data) {
+    return Card(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildMoreOptionsColumn('Buy', Colors.green, data['buy']),
+          _buildMoreOptionsColumn('Sell', Colors.red, data['sell']),
+          _buildMoreOptionsColumn('Hold', Colors.blue, data['hold']),
+        ],
+      ),
+    );
+  }
+
+  ListView _buildMoreOptionsRowCall() {
+    return ListView.builder(
+      itemCount: recommendationData.length,
+      itemBuilder: (context, index) {
+        return _buildMoreOptionsRow(recommendationData[index]);
+      },
+    );
+  }
+
+  Container _buildRecommendationChart() {
+    return Container(
+      height: 100,
+      child: RecommendationChart(
+        recommendationData,
+      ),
+    );
+  }
+
+  Text _buildStockPriceText() {
+    if (stockQuoteData.isNotEmpty) {
+      bool isLowOrNot =
+          stockQuoteData['o'] < stockQuoteData['c'] ? true : false;
+      return Text(
+        "\$ ${stockQuoteData['c']}",
+        style: TextStyle(
+          color: isLowOrNot ? Color.fromARGB(255, 47, 255, 0) : Colors.red,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    } else {
+      return Text('');
+    }
+  }
+
+  ShapeDecoration _buildContainerDecoration() {
+    return ShapeDecoration(
+      gradient: LinearGradient(
+        begin: Alignment(0.00, -1.00),
+        end: Alignment(0, 1),
+        colors: [
+          Color.fromARGB(255, 0, 255, 183),
+          Color.fromARGB(221, 3, 200, 255),
+        ],
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
     );
   }
 
@@ -364,7 +366,7 @@ class _StockProfileScreenState extends State<StockProfileScreen> {
     }
   }
 
-  showIPOPrice() {
+  String _showIPOPrice() {
     String ipoDateString = '${companyData['ipo']}';
     DateTime ipoDate = DateTime.parse(ipoDateString);
     String formattedIPODate = DateFormat('MMMM dd, yyyy').format(ipoDate);

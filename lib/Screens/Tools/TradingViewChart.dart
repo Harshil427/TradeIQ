@@ -1,7 +1,6 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
-import 'package:tradeiq/Services/TradingViewServices.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class TradingViewWidgetHtml extends StatefulWidget {

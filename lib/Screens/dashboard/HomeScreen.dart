@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:tradeiq/Constants/Colors.dart';
+import 'package:tradeiq/Screens/Tools/TradingViewChart.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Services/DatabaseServices.dart';
 import 'package:tradeiq/Services/TradingViewServices.dart';
 import '../../Module/User.dart';
-import '../Tools/TradingViewChart.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -40,11 +40,25 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('TradeIQ'),
         centerTitle: true,
       ),
-      body: Center(
-        child: _userData != null
-            ? Text('Welcome, ${_userData!.name}!')
-            : Text('Loading user data...'),
+      body: buildTestWidget(heigth, width),
+    );
+  }
+
+  buildTestWidget(double height, double width) {
+    return SizedBox(
+      height: height * 0.4,
+      width: width,
+      child: TradingViewWidgetHtml(
+        widget: TradingViewServices.economicCalendarWidget(),
       ),
+    );
+  }
+
+  buildTempBody() {
+    return Center(
+      child: _userData != null
+          ? Text('Welcome, ${_userData!.name}!')
+          : Text('Loading user data...'),
     );
   }
 }

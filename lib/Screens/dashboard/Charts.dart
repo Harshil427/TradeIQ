@@ -49,7 +49,9 @@ class _ChartsScreenState extends State<ChartsScreen> {
 
   _buidStockScreen() {
     return Center(
-      child: StockScreen(),
+      child: InteractiveViewer(
+        child: StockScreen(),
+      ),
     );
   }
 }

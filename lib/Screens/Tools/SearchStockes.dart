@@ -2,13 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:tradeiq/Components/StockProfileTrade.dart';
 import 'dart:convert';
-
 import 'package:tradeiq/Constants/Variable.dart';
-import 'package:tradeiq/Components/StockProfile.dart';
 import 'package:tradeiq/Utils/Functions.dart';
-
+import '../../Components/StockProfile.dart';
+import '../../Components/StockProfileTrade.dart';
 import '../../Constants/Colors.dart';
 
 class SearchStockScreen extends StatefulWidget {

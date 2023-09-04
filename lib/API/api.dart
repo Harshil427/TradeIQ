@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../Constants/Variable.dart';
-import '../Module/ChartSampleData.dart';
 
 class API {
   // Call market news from API
@@ -61,6 +60,21 @@ class API {
   Future<Map<String, dynamic>> getStockProfile(String symbol) async {
     final url =
         'https://finnhub.io/api/v1/stock/profile2?symbol=$symbol&token=$apiFinnhub';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final stockProfile = json.decode(response.body);
+      return Map<String, dynamic>.from(stockProfile);
+    } else {
+      print("API request error: ${response.statusCode}");
+      return {};
+    }
+  }
+
+  Future<Map<String, dynamic>> getStockProfileFromAlpha(String symbol) async {
+    final url =
+        'https://www.alphavantage.co/query?function=OVERVIEW&symbol=$symbol&apikey=$apiAlpha';
 
     final response = await http.get(Uri.parse(url));
 

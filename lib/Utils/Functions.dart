@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tradeiq/Screens/Auth/Login_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Widget onboardingScreenBottom(
     PageController pageController, bool onLast, double height, int pageCount) {
@@ -94,3 +95,13 @@ pickImage(ImageSource source) async {
   print('No image selected');
   return Uint8List(0);
 }
+
+launchURL(String u) async {
+    final Uri url = Uri.parse(u);
+
+    if (!await canLaunchUrl(url)) {
+      launchUrl(url, mode: LaunchMode.externalNonBrowserApplication);
+    } else {
+      print('Could not launch $url');
+    }
+  }

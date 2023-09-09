@@ -1,21 +1,16 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, file_names, unnecessary_string_interpolations
-
-// import 'dart:async';
+// ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-// import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-// import 'package:provider/provider.dart';
+import 'package:tradeiq/Components/market_status.dart';
 import 'package:tradeiq/Constants/Colors.dart';
 import 'package:tradeiq/Module/User.dart';
 import 'package:tradeiq/Screens/Tools/Edit_ProfileScreen.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Services/DatabaseServices.dart';
 import 'package:tradeiq/Utils/Functions.dart';
-// import 'package:tradeiq/Constants/Variable.dart';
 
-import '../../Constants/Variable.dart';
-// import '../../Provider/Variable.dart';
+import '../Pages/EconomicCalendar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -25,11 +20,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-// bool _isVisible = true;
-  // double _scrollPosition = 0.0;
-  // late ScrollController _scrollController;
-  // late Timer _hideTimer;
-
   User? _userData;
 
   @override
@@ -47,45 +37,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  void dispose() {
-    // _scrollController.removeListener(_handleScroll);
-    // _scrollController.dispose();
-    // _hideTimer.cancel();
-    super.dispose();
-  }
-
-  // void _handleScroll() {
-  //   final navBarVisibility = Provider.of<NavBarVisibility>(
-  //     context,
-  //     listen: false,
-  //   );
-
-  //   if (_scrollController.position.userScrollDirection ==
-  //       ScrollDirection.forward) {
-  //     navBarVisibility.setVisible(true);
-  //   } else if (_scrollController.position.userScrollDirection ==
-  //       ScrollDirection.reverse) {
-  //     navBarVisibility.setVisible(false);
-  //   }
-
-  //   if (navBarVisibility.isVisible ||
-  //       _scrollController.position.pixels <= _scrollPosition) {
-  //     // Reset the timer and show the navigation bar immediately
-  //     _hideTimer.cancel();
-  //     navBarVisibility.setVisible(true);
-  //   } else {
-  //     // Start the timer to wait for 5 seconds before hiding the navigation bar
-  //     _hideTimer.cancel();
-  //     _hideTimer = Timer(const Duration(seconds: 5), () {
-  //       navBarVisibility.setVisible(false);
-  //     });
-  //   }
-
-  //   // Update the scroll position for next comparison
-  //   _scrollPosition = _scrollController.position.pixels;
-  // }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -96,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  buildAppBar() {
+  PreferredSize buildAppBar() {
     return PreferredSize(
       preferredSize: Size.fromHeight(80.0),
       child: AppBar(
@@ -130,75 +81,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  buildUserSectionBody() {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 40,
-        bottom: 13,
-      ),
-      child: Column(
-        children: [
-          ListTile(
-            leading: Icon(
-              Icons.add_alarm_sharp,
-            ),
-            title: Text(
-              'Alerts',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontFamily: 'Raleway',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.align_horizontal_left_rounded,
-            ),
-            title: Text(
-              'Predictions',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontFamily: 'Raleway',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.push_pin,
-            ),
-            title: Text(
-              'Saved elements',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontFamily: 'Raleway',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.monetization_on_rounded,
-            ),
-            title: Text(
-              'Portfolio',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontFamily: 'Raleway',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget buildProfileBody() {
     return Container(
       decoration: BoxDecoration(
@@ -208,7 +90,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       child: SingleChildScrollView(
-        // controller: _scrollController,
         child: Column(
           children: [
             buildUserProfileSection(context),
@@ -226,6 +107,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget buildUserSectionBody() {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 40,
+        bottom: 13,
+      ),
+      child: Column(
+        children: [
+          buildListTile(Icons.add_alarm_sharp, 'Alerts', () {}),
+          buildListTile(
+              Icons.align_horizontal_left_rounded, 'Predictions', () {}),
+          buildListTile(Icons.push_pin, 'Saved elements', () {}),
+          buildListTile(Icons.monetization_on_rounded, 'Portfolio', () {}),
+          buildListTile(
+            Icons.calendar_month_outlined,
+            "Economic Calendar",
+            () {
+              moveNextPage(context, EconomicCalendarPage());
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget buildListTile(IconData icon, String title, VoidCallback? onTap) {
+    return ListTile(
+      leading: Icon(
+        icon,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontFamily: 'Raleway',
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
     );
   }
 
@@ -247,14 +171,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     'https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80',
                   )
                 : null,
-            // child: _userData != null &&
-            //         (_userData!.profileImage == null ||
-            //             _userData!.profileImage!.isEmpty)
-            //     ? Icon(
-            //         Icons.person,
-            //         color: Colors.white,
-            //       )
-            //     : null,
           ),
           Text(
             _userData != null ? '${_userData!.name}' : 'Loading user data...',
@@ -305,71 +221,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           SizedBox(height: height * .01),
           buildSectionTitle('Tools'),
-          ListTile(
-            leading: SizedBox(
-              width: 30,
-              height: 30,
-              child: Image(
-                image: AssetImage('Assets/Images/icons/profit.png'),
-              ),
-            ),
-            title: Opacity(
-              opacity: 0.68,
-              child: Text(
-                'Select Stocks',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontFamily: 'Raleway',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: SizedBox(
-              width: 30,
-              height: 30,
-              child: Image(
-                image: AssetImage('Assets/Images/icons/analysis.png'),
-              ),
-            ),
-            title: Opacity(
-              opacity: 0.68,
-              child: Text(
-                'Analysis',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontFamily: 'Raleway',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: SizedBox(
-              width: 30,
-              height: 30,
-              child: Image(
-                image: AssetImage('Assets/Images/icons/broker.png'),
-              ),
-            ),
-            title: Opacity(
-              opacity: 0.68,
-              child: Text(
-                'Best Broker',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontFamily: 'Raleway',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            onTap: () {},
+          buildListTileWithImage(
+              'Assets/Images/icons/profit.png', 'Select Stocks', () {}),
+          buildListTileWithImage(
+              'Assets/Images/icons/analysis.png', 'Analysis', () {}),
+          buildListTileWithImage(
+              'Assets/Images/icons/broker.png', 'Best Broker', () {}),
+          GestureDetector(
+            onTap: () {
+              moveNextPage(context, MarketStatusWidget());
+            },
+            child: buildListTileWithImage(
+                'Assets/Images/icons/institution.png', 'Market Status', () {
+              moveNextPage(context, MarketStatusWidget());
+            }),
           ),
         ],
       ),
@@ -385,72 +250,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           SizedBox(height: height * .01),
           buildSectionTitle('Support'),
-          ListTile(
-            leading: SizedBox(
-              width: 30,
-              height: 30,
-              child: Image(
-                image: AssetImage('Assets/Images/icons/help.png'),
-              ),
-            ),
-            title: Opacity(
-              opacity: 0.68,
-              child: Text(
-                'Help Center',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontFamily: 'Raleway',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: SizedBox(
-              width: 30,
-              height: 30,
-              child: Image(
-                image: AssetImage('Assets/Images/icons/service.png'),
-              ),
-            ),
-            title: Opacity(
-              opacity: 0.68,
-              child: Text(
-                'Support',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontFamily: 'Raleway',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: SizedBox(
-              width: 30,
-              height: 30,
-              child: Image(
-                image: AssetImage('Assets/Images/icons/bug.png'),
-              ),
-            ),
-            title: Opacity(
-              opacity: 0.68,
-              child: Text(
-                'Report bug',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontFamily: 'Raleway',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            onTap: () {},
-          ),
+          buildListTileWithImage(
+              'Assets/Images/icons/help.png', 'Help Center', () {}),
+          buildListTileWithImage(
+              'Assets/Images/icons/service.png', 'Support', () {}),
+          buildListTileWithImage(
+              'Assets/Images/icons/bug.png', 'Report Bug', () {}),
         ],
       ),
     );
@@ -461,42 +266,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: EdgeInsets.only(left: 40),
       child: Column(
         children: [
-          ListTile(
-            leading: Icon(
-              Icons.logout_sharp,
-              color: Colors.red,
-            ),
-            title: Opacity(
-              opacity: 0.5,
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Sign Out',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    TextSpan(text: '\n'),
-                    TextSpan(
-                      text: _userData != null
-                          ? '${_userData!.email}'
-                          : 'Loding data...',
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            onTap: () {
-              AuthServices().signOut();
-              setState(() {
-                moveFromSignOut = true;
-              });
-            },
-          ),
+          buildListTile(Icons.logout_sharp,
+              'Sign Out\n${_userData != null ? _userData!.email : 'Loding data...'}',
+              () {
+            AuthServices().signOut();
+          }),
           SizedBox(
             height: 30,
           ),
         ],
       ),
+    );
+  }
+
+  Widget buildListTileWithImage(
+      String imagePath, String title, VoidCallback? onTap) {
+    return ListTile(
+      leading: SizedBox(
+        width: 30,
+        height: 30,
+        child: Image(
+          image: AssetImage(imagePath),
+        ),
+      ),
+      title: Opacity(
+        opacity: 0.68,
+        child: Text(
+          title,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontFamily: 'Raleway',
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      onTap: onTap,
     );
   }
 

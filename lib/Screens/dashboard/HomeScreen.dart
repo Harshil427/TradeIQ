@@ -2,10 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:tradeiq/Constants/Colors.dart';
-import 'package:tradeiq/Screens/Tools/TradingViewChart.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Services/DatabaseServices.dart';
-import 'package:tradeiq/Services/TradingViewServices.dart';
 import '../../Module/User.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -32,32 +30,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final heigth = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
+    // final heigth = MediaQuery.of(context).size.height;
+    // final width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text('TradeIQ'),
         centerTitle: true,
       ),
-      body: buildTestWidget(heigth, width),
-    );
-  }
-
-  buildTestWidget(double height, double width) {
-    return SizedBox(
-      height: height * 0.4,
-      width: width,
-      child: TradingViewWidgetHtml(
-        widget: TradingViewServices.economicCalendarWidget(),
-      ),
+      body: buildTempBody(),
     );
   }
 
   buildTempBody() {
-    return Center(
+    return Container(
+      padding: EdgeInsets.only(left: 20, top: 10),
       child: _userData != null
-          ? Text('Welcome, ${_userData!.name}!')
+          ? Text(
+              '👋 Hi ! , ${_userData!.name}',
+              style: TextStyle(
+                fontSize: 26,
+              ),
+            )
           : Text('Loading user data...'),
     );
   }

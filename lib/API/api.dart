@@ -128,6 +128,25 @@ class API {
     }
   }
 
-  // Get data for chart
-  
+  // Get data of market stutus
+  Future<List<Map<String, dynamic>>> getMarketStatus() async {
+    const url =
+        'https://www.alphavantage.co/query?function=MARKET_STATUS&apikey=$apiAlpha';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      print('Response status code: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body)['markets'];
+        // print('DATA: $data');
+        return List<Map<String, dynamic>>.from(data);
+      } else {
+        print("API request error: ${response.statusCode}");
+        return [];
+      }
+    } catch (error) {
+      print("Error fetching market status data: $error");
+      return [];
+    }
+  }
 }

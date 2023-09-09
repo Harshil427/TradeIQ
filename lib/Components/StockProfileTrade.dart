@@ -1,15 +1,14 @@
-// ignore_for_file: prefer_const_constructors, avoid_print, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, avoid_print, prefer_const_literals_to_create_immutables, file_names
 
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:tradeiq/Components/CompanyInfoScreen.dart';
 import 'package:tradeiq/Screens/Tools/TradingViewChart.dart';
 import 'package:tradeiq/Services/TradingViewServices.dart';
-import 'package:tradeiq/Utils/Functions.dart';
 import '../API/api.dart';
 import '../Constants/Colors.dart';
 import '../Screens/Tools/RecommendationChart.dart';
+import 'ChartTabScreen.dart';
 import 'TradingViewChart.dart';
 
 class StockProfileTrade extends StatefulWidget {
@@ -75,6 +74,7 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
         ),
         body: TabBarView(
           physics: NeverScrollableScrollPhysics(),
+          
           children: [
             // Content for Tab 1
             _buildTabContent(1),
@@ -149,38 +149,14 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
   }
 
   Widget buildChartWidgets(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
 
-    return Column(
-      children: [
-        _buildStockInfoContainer(width),
-        buildDetailsAboutCOH(),
-        Divider(),
-        buildTradingViewChart(width, context, height),
-        SizedBox(
-          height: 30,
-        ),
-        // buildMiniChart(width, height),
-        // GestureDetector(
-        //   onTap: () {
-        // navigateToTradingViewChart();
-        //   },
-        //   child: buildFullChartButton(width),
-        // ),
-      ],
+    return ChartTabScreen(
+      companyData: companyData,
+      stockQuoteData: stockQuoteData,
+      stock: widget.stock,
     );
   }
 
-  buildTradingViewChart(double width, BuildContext context, double heigth) {
-    return SizedBox(
-      height: heigth * 0.55,
-      width: width * 0.96,
-      child: TradingViewWidgetHtml(
-        widget: TradingViewServices.realTimeChart(widget.stock['symbol'], true),
-      ),
-    );
-  }
 
   buildOverViewWidget(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -191,25 +167,6 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
         buildTechnicalAnalysis(width, height),
         Divider(),
         _buildAboutMoreStockContainer(),
-      ],
-    );
-  }
-
-  buildDetailsAboutCOH() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Text('${stockQuoteData['l']}'),
-        Text('${stockQuoteData['o']}'),
-        Text('${stockQuoteData['h']}'),
-        IconButton(
-            onPressed: () {
-              moveNextPage(
-                context,
-                TradingViewChart(stock: widget.stock),
-              );
-            },
-            icon: Icon(Icons.fullscreen))
       ],
     );
   }
@@ -230,30 +187,6 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
       width: width * 0.9,
       child: TradingViewWidgetHtml(
         widget: TradingViewServices.miniChartWidget(widget.stock['symbol']),
-      ),
-    );
-  }
-
-  Widget buildFullChartButton(double width) {
-    return Container(
-      margin: EdgeInsets.all(30),
-      width: width * 0.4,
-      height: 50,
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor,
-        border: Border.all(style: BorderStyle.solid),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Center(
-        child: Text(
-          'Full chart >',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Raleway',
-          ),
-        ),
       ),
     );
   }
@@ -297,55 +230,6 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
         widget: TradingViewServices.snapBySymbol(widget.stock['symbol']),
       ),
     );
-  }
-
-  Widget _buildStockInfoContainer(double width) {
-    return Container(
-      margin: EdgeInsets.all(20),
-      height: 100,
-      decoration: _buildContainerDecoration(),
-      child: Row(
-        children: [
-          SizedBox(width: 10),
-          _buildStockAvatar(),
-          SizedBox(width: 20),
-          _buildCompanyDetailsColumn(),
-          Spacer(),
-          _buildStockPriceText(),
-          SizedBox(width: 10),
-        ],
-      ),
-    );
-  }
-
-  ShapeDecoration _buildContainerDecoration() {
-    return ShapeDecoration(
-      gradient: LinearGradient(
-        begin: Alignment(0.00, -1.00),
-        end: Alignment(0, 1),
-        colors: [
-          Color.fromARGB(255, 0, 255, 183),
-          Color.fromARGB(221, 3, 200, 255),
-        ],
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-    );
-  }
-
-  Widget _buildStockAvatar() {
-    if (companyData['logo'] != null) {
-      return CircleAvatar(
-        child: SvgPicture.network(companyData['logo']),
-        radius: 25,
-      );
-    } else {
-      return CircleAvatar(
-        radius: 30,
-        child: Icon(Icons.image),
-      );
-    }
   }
 
   Container _buildAboutMoreStockContainer() {
@@ -412,40 +296,6 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
         recommendationData,
       ),
     );
-  }
-
-  Row _buildCompanyDetailsColumn() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          companyData['ticker'],
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Text _buildStockPriceText() {
-    if (stockQuoteData.isNotEmpty) {
-      bool isLowOrNot =
-          stockQuoteData['o'] < stockQuoteData['c'] ? true : false;
-      return Text(
-        "\$ ${stockQuoteData['c']}",
-        style: TextStyle(
-          color: isLowOrNot ? Color.fromARGB(255, 47, 255, 0) : Colors.red,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      );
-    } else {
-      return Text('');
-    }
   }
 
   Future<void> _fetchCompanyData() async {

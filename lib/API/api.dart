@@ -1,9 +1,11 @@
-// ignore_for_file: avoid_print, unused_element
+// ignore_for_file: avoid_print, unused_element, prefer_const_constructors
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../Constants/Variable.dart';
+import '../Module/News.dart';
+import '../Module/StockLoserGainer.dart';
 
 class API {
   // Call market news from API
@@ -43,7 +45,8 @@ class API {
 
   //Search Stocks
   Future<List<Map<String, dynamic>>> searchStocks(String query) async {
-    final url = 'https://finnhub.io/api/v1/search?q=$query&token=$apiFinnhub';
+    final url =
+        'https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=$query&apikey=$apiAlpha';
 
     final response = await http.get(Uri.parse(url));
 
@@ -147,6 +150,50 @@ class API {
     } catch (error) {
       print("Error fetching market status data: $error");
       return [];
+    }
+  }
+
+  // Get news for specific stocks
+  Future<List<News>> fetchStockNews({required String ticker}) async {
+    final DateTime currentDate = DateTime.now();
+    final DateTime fromDate = currentDate.subtract(Duration(days: 10));
+    final String fromDateString = fromDate.toIso8601String().substring(0, 10);
+    final String toDateString = currentDate.toIso8601String().substring(0, 10);
+
+    final url =
+        'https://finnhub.io/api/v1/company-news?symbol=$ticker&from=$fromDateString&to=$toDateString&token=$apiFinnhub';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final List<News> news = [];
+
+        for (var item in jsonData) {
+          news.add(News.fromJson(item));
+        }
+        return news;
+      } else {
+        print("API request error: ${response.statusCode}");
+        return [];
+      }
+    } catch (error) {
+      print("Error fetching stock news data: $error");
+      return [];
+    }
+  }
+
+  Future<StockData> fetchData() async {
+    final response = await http.get(
+        Uri.parse(
+            'https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=$apiAlpha'),
+        headers: {'Content-Type': 'application/json'});
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonData = json.decode(response.body);
+      return StockData.fromJson(jsonData);
+    } else {
+      throw Exception('Failed to load data');
     }
   }
 }

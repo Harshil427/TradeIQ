@@ -1,15 +1,16 @@
-// ignore_for_file: prefer_const_constructors, avoid_print, prefer_const_literals_to_create_immutables, file_names
+// ignore_for_file: file_names, prefer_typing_uninitialized_variables, prefer_const_constructors, avoid_print, use_build_context_synchronously
 
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:tradeiq/Components/CompanyInfoScreen.dart';
 import 'package:tradeiq/Screens/Tools/TradingViewChart.dart';
+import 'package:tradeiq/Services/DatabaseServices.dart';
 import 'package:tradeiq/Services/TradingViewServices.dart';
 import '../API/api.dart';
 import '../Constants/Colors.dart';
 import '../Screens/Tools/RecommendationChart.dart';
+import '../Widgets/StockNews.dart';
 import 'ChartTabScreen.dart';
-import 'TradingViewChart.dart';
 
 class StockProfileTrade extends StatefulWidget {
   final stock;
@@ -71,10 +72,17 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
           bottom: TabBar(
             tabs: tabs,
           ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                addToFav();
+              },
+              icon: Icon(Icons.star_border),
+            ),
+          ],
         ),
         body: TabBarView(
           physics: NeverScrollableScrollPhysics(),
-          
           children: [
             // Content for Tab 1
             _buildTabContent(1),
@@ -83,6 +91,25 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
             //Content for Tab 3
             _buildTabContent(3),
           ],
+        ),
+      ),
+    );
+  }
+
+  addToFav() async {
+    await DatabaseServices().saveDataToFirestore(
+      widget.stock['symbol'],
+      widget.stock['description'],
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Added to favorites'),
+        dismissDirection: DismissDirection.up,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height - 150,
+          left: 10,
+          right: 10,
         ),
       ),
     );
@@ -141,22 +168,13 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
     );
   }
 
-  TextStyle textForSpecifications() {
-    return TextStyle(
-      fontSize: 18,
-      fontWeight: FontWeight.w500,
-    );
-  }
-
   Widget buildChartWidgets(BuildContext context) {
-
     return ChartTabScreen(
       companyData: companyData,
       stockQuoteData: stockQuoteData,
       stock: widget.stock,
     );
   }
-
 
   buildOverViewWidget(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -167,35 +185,46 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
         buildTechnicalAnalysis(width, height),
         Divider(),
         _buildAboutMoreStockContainer(),
+        Divider(),
+        // buildSnapNews(),
+        SizedBox(
+          height: 10,
+        ),
+        buildTextNews(),
+        buildNewsStock(),
+        SizedBox(height: 30)
       ],
     );
   }
 
-  Widget buildTradingViewCard(double width, BuildContext context) {
-    return SizedBox(
-      height: 100,
-      width: width * 0.9,
-      child: TradingViewWidgetHtml(
-        widget: TradingViewServices.symbolInfoCard(widget.stock['symbol']),
-      ),
+  buildTextNews() {
+    return RichText(
+      text: TextSpan(children: [
+        TextSpan(
+          text: 'News of ',
+          style: TextStyle(fontSize: 22),
+        ),
+        TextSpan(
+          text: '${widget.stock['symbol']}',
+          style: TextStyle(fontSize: 22, color: Colors.blue),
+        ),
+      ]),
     );
   }
 
-  Widget buildMiniChart(double width, double height) {
-    return SizedBox(
-      height: height * 0.3,
-      width: width * 0.9,
-      child: TradingViewWidgetHtml(
-        widget: TradingViewServices.miniChartWidget(widget.stock['symbol']),
-      ),
+  buildNewsStock() {
+    return StockNews(
+      stock: widget.stock,
     );
   }
 
-  void navigateToTradingViewChart() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TradingViewChart(stock: widget.stock),
+  buildSnapNews() {
+    return SingleChildScrollView(
+      child: Container(
+        height: 500,
+        child: TradingViewWidgetHtml(
+          widget: TradingViewServices.snapBySymbol(widget.stock['symbol']),
+        ),
       ),
     );
   }
@@ -207,27 +236,6 @@ class _StockProfileTradeState extends State<StockProfileTrade> {
       child: TradingViewWidgetHtml(
         widget:
             TradingViewServices.technicalAnalysisWidget(widget.stock['symbol']),
-      ),
-    );
-  }
-
-  Widget buildCompanyProfile() {
-    return Container(
-      margin: EdgeInsets.all(20),
-      height: 150,
-      child: TradingViewWidgetHtml(
-        widget:
-            TradingViewServices.companyProfileWidget(widget.stock['symbol']),
-      ),
-    );
-  }
-
-  Widget buildSnapBySymbol() {
-    return Container(
-      margin: EdgeInsets.all(20),
-      height: 500,
-      child: TradingViewWidgetHtml(
-        widget: TradingViewServices.snapBySymbol(widget.stock['symbol']),
       ),
     );
   }

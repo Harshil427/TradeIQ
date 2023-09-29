@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, prefer_const_constructors
+// ignore_for_file: avoid_print, prefer_const_constructors, unused_field, library_private_types_in_public_api, file_names
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

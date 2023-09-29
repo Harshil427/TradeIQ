@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, file_names
+// ignore_for_file: prefer_const_constructors, prefer_const_constructors_in_immutables, file_names, avoid_print
 
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';

@@ -1,4 +1,4 @@
-// ignore_for_file: sort_child_properties_last, prefer_const_constructors, use_key_in_widget_constructors
+// ignore_for_file: sort_child_properties_last, prefer_const_constructors, use_key_in_widget_constructors, file_names
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';

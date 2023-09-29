@@ -44,7 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   buildTempBody() {
     return Container(
-      padding: EdgeInsets.only(left: 20, top: 10),
+      padding: EdgeInsets.only(
+        left: 20,
+        top: 10,
+      ),
       child: _userData != null
           ? Text(
               '👋 Hi ! , ${_userData!.name}',

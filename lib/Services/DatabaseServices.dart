@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, avoid_print, avoid_web_libraries_in_flutter
+// ignore_for_file: file_names, avoid_print, avoid_web_libraries_in_flutter, unnecessary_null_comparison
 
 import 'dart:io';
 import 'dart:typed_data';
@@ -106,6 +106,27 @@ class DatabaseServices {
     } on FirebaseException catch (e) {
       res = e.code;
     }
+    return res;
+  }
+
+  // Add favorite stock in database
+  Future<String> saveDataToFirestore(
+      String stockName, String description) async {
+    String res = 'Some error...';
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(AuthServices().getUid())
+        .collection('favrites')
+        .add({
+      'name': stockName,
+      'description': description,
+    }).then((_) {
+      // Data saved successfully
+      res = 'Success';
+    }).catchError((error) {
+      // Handle errors here, such as displaying an error message to the user.
+      print('Error saving data: $error');
+    });
     return res;
   }
 }

@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, prefer_const_constructors, sort_child_properties_last, no_leading_underscores_for_local_identifiers
+// ignore_for_file: file_names, prefer_const_constructors, sort_child_properties_last, no_leading_underscores_for_local_identifiers, avoid_print
 
 import 'dart:typed_data';
 

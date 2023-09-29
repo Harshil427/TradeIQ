@@ -19,6 +19,7 @@ class TradingViewServices {
   "style": "2",
   "locale": "in",
   "enable_publishing": false,
+  "backgroundColor": "rgba(0, 0, 0, 1)",
   "hide_top_toolbar": $toolBar,
   "allow_symbol_change": true,
   "hide_volume": true,
@@ -187,7 +188,7 @@ class TradingViewServices {
   "isTransparent": true,
   "displayMode": "regular",
   "width": "100%",
-  "height": "100%",
+  "height": "1000",
   "locale": "in"
 }
   </script>
@@ -607,7 +608,7 @@ class TradingViewServices {
   "width": "100%",
   "height": "100%",
   "colorTheme": "dark",
-  "isTransparent": false,
+  "isTransparent": true,
   "locale": "in",
   "importanceFilter": "0,1",
   "currencyFilter": "USD,EUR,ITL,NZD,CHF,AUD,FRF,JPY,ZAR,TRL,CAD,DEM,MXN,ESP,GBP"

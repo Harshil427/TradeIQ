@@ -57,6 +57,7 @@ dependencies:
   syncfusion_flutter_charts: ^22.2.7
   zoom_widget: ^2.0.1
   url_launcher: ^6.1.14
+  quick_actions: ^1.0.6
 
 dev_dependencies:
   flutter_test:

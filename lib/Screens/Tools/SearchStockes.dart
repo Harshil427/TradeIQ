@@ -1,11 +1,10 @@
-// ignore_for_file: prefer_const_constructors, prefer_final_fields, library_private_types_in_public_api
+// ignore_for_file: prefer_const_constructors, prefer_final_fields, library_private_types_in_public_api, file_names
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:tradeiq/Constants/Variable.dart';
 import 'package:tradeiq/Utils/Functions.dart';
-import '../../Components/StockProfile.dart';
 import '../../Components/StockProfileTrade.dart';
 import '../../Constants/Colors.dart';
 

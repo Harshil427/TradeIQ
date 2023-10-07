@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:tradeiq/Constants/Colors.dart';
+import 'package:tradeiq/Components/ListOfSignals.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Services/DatabaseServices.dart';
 import '../../Module/User.dart';
@@ -35,15 +36,30 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
+        backgroundColor: backgroundColor,
         title: const Text('TradeIQ'),
-        centerTitle: true,
+        // centerTitle: true,
       ),
-      body: buildTempBody(),
+      body: homeScreenBody(),
+    );
+  }
+
+  homeScreenBody() {
+    return Column(
+      children: [
+        buildTempBody(),
+        
+        SizedBox(
+          height: 20,
+        ),
+        StockList(),
+      ],
     );
   }
 
   buildTempBody() {
     return Container(
+      alignment: Alignment.centerLeft,
       padding: EdgeInsets.only(
         left: 20,
         top: 10,

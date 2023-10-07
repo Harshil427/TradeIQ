@@ -8,8 +8,8 @@ import 'package:quick_actions/quick_actions.dart';
 import 'package:tradeiq/Components/market_status.dart';
 import 'package:tradeiq/Screens/Pages/EconomicCalendar.dart';
 import 'package:tradeiq/Screens/Tools/SearchStockes.dart';
+import 'package:tradeiq/Services/Messaging.dart';
 import 'package:tradeiq/Utils/Functions.dart';
-
 import 'Provider/Variable.dart';
 import 'Services/CheckAuthServices.dart';
 import 'firebase_options.dart';
@@ -19,6 +19,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await FirebaseMessagingAPI().initializeNotifications();
 
   runApp(const MyApp());
 }

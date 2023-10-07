@@ -16,7 +16,7 @@ class AuthWrapper extends StatelessWidget {
         return LoginScreen();
       } else {
         return IntroScreen();
-      }
+      } 
     }
   }
 

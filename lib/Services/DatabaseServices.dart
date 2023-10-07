@@ -108,7 +108,7 @@ class DatabaseServices {
     }
     return res;
   }
-
+  
   // Add favorite stock in database
   Future<String> saveDataToFirestore(
       String stockName, String description) async {

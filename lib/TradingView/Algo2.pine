@@ -1,0 +1,1298 @@
+//@version=5
+strategy("prsgp", overlay=true, process_orders_on_close = true)
+
+
+
+
+// ****************** Algo_Setup_Code-X    { ******************** 
+
+
+
+// Group_Algo_1    = "======== Algo_Setup ========"
+Group_Algo_1       = " 🟥 🟥 🟥 Algo_Setup     🟥 🟥 🟥" // {
+output_syntax      = input.string("{{strategy.order.alert_message}}", title="OutPut_Alert_Syntax",  group=Group_Algo_1, tooltip="Paste this Box Syntax in Alert Message Box\n\nafter Deleting Everthing in Message Box")
+
+DEBUG              = input.bool(  false,                "Debug Mode",     group=Group_Algo_1)
+Strategy_Tag_Algo  = input.string("EMA_Strategy",       "Strategy Tag",   group=Group_Algo_1, tooltip = "Tag Must be Registered in Bot to Start  Algo Trading")
+Product_Algo       = input.string("INTRADAY",           "Products",       group=Group_Algo_1, options=["CNC", "NRML", "INTRADAY", "MARGIN", "BO"], tooltip='Aliveblue_V2 :- [ CNC,NRML,INTRADAY ]')
+Trade_Segment_Algo = input.string("Stocks",             "Segment",        group=Group_Algo_1, options=["Options", "Futures", "Stocks"])
+Options_Qty_Type_Algo__SL_Based = input.string("SL_Based",        "Options_Qty_Type", group=Group_Algo_1, options=[ "SL_Based", "LTP_Based" ])=="SL_Based"
+Quantity_Algo      = 0 // input.int(   0,                    "Quantity",       group=Group_Algo_1, tooltip = "'0' means Default Quantity From Strategy_Tag will be Selected Automatically"), 
+Strike_Price       = request.security(input.symbol( "", "Striker_Ticker", group=Group_Algo_1 ), timeframe.period, close)
+Lot_Size           = input.int( 50,      "Lot_Size",           group = Group_Algo_1)  
+
+
+Bot_Type_Algo       = "MULTI_USER"       // input.string("MULTI_USER",         "Bot Type",       group=Group_Algo_1, options=['MULTI_USER', "SINGLE_USER"], tooltip="in 'SINGLE_USER'  Login_Username is Required must Matching in Bot")
+Login_Username_Algo = "All"              // input.string("harjit",             "Login Username", group=Group_Algo_1)
+Symbol_Algo         = ""                 // input.string("BANKNIFTY22JUNFUT",  "Symbol",         group=Group_Algo_1)
+Exchange_Algo       = ""         // input.string("NFO",                "Exchange",       group=Group_Algo_1, options=["NSE", "BSE", "NFO", "CDS", "BFO", "MCX", "BCD"])
+Order_Type_Algo     = "MARKET"   // input.string("MARKET",             "Order_Type",     group=Group_Algo_1, options=["MARKET", "LIMIT", "SL-M", "SL" ])
+Delay_Algo          = "0"        // str.tostring(input.float(0,"Delay (Delay in Entry Order in Seconds)", step=.5, maxval=5, minval=0, group=Group_Algo_1 ) )
+// }
+
+Group_Algo_2       = " 🟥 🟥 🟥 Options Setup  🟥 🟥 🟥" // {
+Script_Algo         = '' //input.string("BANKNIFTY",  "Script Name",                          group=Group_Algo_2)
+Expiry_Type_Algo    = "" //input.string("NSE-OPT",    "Expiry Type",                          group=Group_Algo_2, options=["NSE-OPT", "NSE-FUT", "NSE-OPT_MONTH", "NONE"], tooltip="NSE-OPT --> Weekly Expiry of the Nifty\nNSE-OPT_MONTH --> Monthly Expiry of the Nifty\nNSE-Futures --> Nifty Futures Expiry of the Nifty\nNONE --> Type Your OWN EXPIRY in format  --> \nDD-MM-YYYY  like  '25-08-2022'  " )
+Custom_Expiry_Algo  = "" //input.string("25-08-2022", "Custom Expiry @ NONE Selected",        group=Group_Algo_2, tooltip="Bot Will not Select the Expiry Autommaticaly if ***NONE*** Selected Above else it is not used no Need to Worry About it  \n\nyou Must Type the Valid Expiry in Format --> \nDD-MM-YYYY  like  '25-08-2022'    " )
+Auto_Expiry_Algo    = "" //str.tostring(input.int(0,  "Auto Expiry",                          group=Group_Algo_2, tooltip="Bot Will Select the Expiry Autommaticaly No Need to type\n\n'0' Current Expiry\,'1' Next Expiry\n\n🟥Note -  Current,Next Expiry are as According to the Selected Type Above\n if NONE Selected Above you Must Type the Valid Expiry in Format --> \nDD-MM-YYYY  like  '25-08-2022'    " ))
+Expiry_Algo         = "" //Expiry_Type_Algo=="NONE" ? Custom_Expiry_Algo : Auto_Expiry_Algo
+
+
+Round_Algo          = "" //str.tostring(input.int(100,"Round (Nearest Strike Gap)", step=50,  group=Group_Algo_2, tooltip="Nearest Strike Gap like in \n\nBanknifty Next Nearest Strike Difference is 100 \n\nNifty Next Nearest Strike Difference is 50 " ) )
+Long_OPT_Type_Algo  = input.string("PE",   "🟢Long Options     Type", options=['CE', 'PE'],    group=Group_Algo_2, tooltip="At  Long Entry Which Options Type to Take for Order" )
+Long_TT_Algo        = input.string("BUY",  "🟢Long Transaction Type", options=['BUY', 'SELL'], group=Group_Algo_2, tooltip="At  Long Entry Which Direction Order Has to Take Place" )
+Long_IN_OUT_Algo    = str.tostring(input.int(0,     "🟢Long IN OUT",                           group=Group_Algo_2, tooltip="'0' Means ATM, '1' means one Strike Up, '2' Means two Strikes Up, '-1' one Strike Down From Current Rounded Price\n\nLike - Price=36500, Round=100, \n'0'--> 36000,\n'1'--> 36100,\n'2'--> 36200,\n'-1'--> 35900,\n'-2'--> 35800 " ) )
+
+Short_OPT_Type_Algo = input.string("PE",  "🔴Short Options     Type", options=['CE', 'PE'],    group=Group_Algo_2, tooltip="At Short Entry Which Options Type to Take for Order" )
+Short_TT_Algo       = input.string("BUY", "🔴Short Transaction Type", options=['BUY', 'SELL'], group=Group_Algo_2, tooltip="At Short Entry Which Direction Order Has to Take Place" )
+Short_IN_OUT_Algo   = str.tostring(input.int(0,     "🔴Short IN OUT",                          group=Group_Algo_2, tooltip="'0' Means ATM, '1' means one Strike Up, '2' Means two Strikes Up, '-1' one Strike Down From Current Rounded Price\n\nLike - Price=36500, Round=100, \n'0'--> 36000,\n'1'--> 36100,\n'2'--> 36200,\n'-1'--> 35900,\n'-2'--> 35800 " ) )
+// }
+
+
+
+
+// **************** Newer Formater { ***********************
+Main_Order_Syntax(Current_Tag, Old_Tag, ORDER_DATA  )=> //{
+    RETURN='{'
+         + str.format('"BT":"{0}",'         ,       Bot_Type_Algo        )
+         + str.format('"USER":"{0}",'       ,       Login_Username_Algo  )
+         + str.format('"S_TAG":"{0}",'      ,       Strategy_Tag_Algo    )
+         + str.format('"O_Tag":"{0}",'      ,       Current_Tag          )
+         + str.format('"Prev_O_Tag":"{0}",' ,       Old_Tag              )
+         + '"DATA":' +ORDER_DATA
+         +  '}'
+    RETURN //}
+
+Entry_Order_Syntax(TT, QTY)=> //{
+    RETURN = '{' 
+         + (Delay_Algo!='0' ? str.format( '"DL":"{0}",'       ,   Delay_Algo ): '')
+         
+        //  + str.format( '"TS":"{0}",'   ,   Symbol_Algo       ) 
+        //  + str.format( '"E":"{0}",'    ,   Exchange_Algo     ) 
+         + str.format('"TRADE_TYPE":"{0}",'        ,  "EQUITY"        )        
+         + str.format( '"TT":"{0}",'   ,   TT                ) 
+         + (QTY!=0 ? str.format( '"Q":"{0}",'    ,   str.tostring(QTY) )  : '')
+        //  + str.format( '"OT":"{0}",'   ,   Order_Type_Algo   ) 
+         + str.format( '"P":"{0}"'     ,   Product_Algo      ) 
+         
+		 + '}'
+	RETURN //}
+
+Options_Entry_Order_Syntax(TT, QTY, OPT_TYPE, IN_OUT, PRICE=close, RISK_VALUE=0.0)=> //{
+
+    RETURN = '{' 
+        //  + (SL_ORDER!=''    ? str.format('"SL_ORDER":"{0}",'  ,   SL_ORDER   ): '')
+        //  + (TP_ORDER!=''    ? str.format('"TP_ORDER":"{0}",'  ,   TP_ORDER   ): '')
+         + (Delay_Algo!='0' ? str.format( '"DL":"{0}",'       ,   Delay_Algo ): '')
+         + str.format('"TRADE_TYPE":"{0}",'        ,  "OPTIONS"        )         
+        //  + str.format( '"E":"{0}",'    ,   Exchange_Algo     ) 
+         + str.format( '"TT":"{0}",'   ,   TT                ) 
+         + (Options_Qty_Type_Algo__SL_Based==false and RISK_VALUE>0 ? str.format( '"RISK_VALUE":"{0}",',   str.tostring(RISK_VALUE) ) : '')
+         + (Options_Qty_Type_Algo__SL_Based==false and RISK_VALUE>0 ? str.format( '"LOT_SIZE":"{0}",',     str.tostring(Lot_Size)   ) : '')
+
+         + (QTY!=0 ? str.format( '"Q":"{0}",'    ,   str.tostring(QTY) )  : '')
+        //  + str.format( '"OT":"{0}",'   ,   Order_Type_Algo   ) 
+         + str.format( '"P":"{0}",'    ,   Product_Algo      ) 
+         
+         
+         + str.format('"PRICE":"{0}",'        ,  str.tostring(PRICE)        )
+        //  + str.format('"SCRIPT":"{0}",'       ,  Script_Algo                )
+        //  + str.format('"EXPIRY_TYPE":"{0}",'  ,  Expiry_Type_Algo           )
+        //  + str.format('"EXPIRY":"{0}",'       ,  Expiry_Algo                )
+        //  + str.format('"ROUND":"{0}",'        ,  Round_Algo                 )
+         
+         + str.format('"OPT_TYPE":"{0}",'     ,  OPT_TYPE                   )
+         + str.format('"IN_OUT":"{0}"'        ,  IN_OUT                     )
+         
+		 + '}'
+	RETURN //}				
+	
+
+
+
+Buy_Entry_Syntax(MSG, PRICE=close, QTY=0, Reverse=false, RISK_VALUE=0.0)   =>   //{
+    Order_Data    = ' "LONG":[], "SHORT":[] '
+    
+    
+    if Trade_Segment_Algo=="Options"
+        Order_Data    := str.format('"LONG":[ {0} ], "SHORT":[]', Options_Entry_Order_Syntax(Long_TT_Algo, QTY, Long_OPT_Type_Algo, Long_IN_OUT_Algo, PRICE, RISK_VALUE)  )
+    else
+        Order_Data    := str.format('"LONG":[ {0} ], "SHORT":[]', Entry_Order_Syntax("BUY", QTY)   )
+    Order_Data    := '{'  + Order_Data + '}'
+
+    
+    RETURN        =     (DEBUG or MSG=='OFF') ?  Main_Order_Syntax( 'long',    (Reverse ? 'short' : 'flat' ),    Order_Data )   : MSG
+    RETURN  //}
+
+Sell_Entry_Syntax(MSG, PRICE=close, QTY=0, Reverse=false, RISK_VALUE=0.0)   =>   //{
+    Order_Data    = '"LONG":[], "SHORT":[]'
+    
+    
+    if Trade_Segment_Algo=="Options"
+        Order_Data    := str.format('"LONG":[], "SHORT":[ {0} ]', Options_Entry_Order_Syntax(Short_TT_Algo, QTY, Short_OPT_Type_Algo, Short_IN_OUT_Algo, PRICE, RISK_VALUE)  )
+    else
+        Order_Data    := str.format('"LONG":[], "SHORT":[ {0} ]', Entry_Order_Syntax("SELL", QTY)   )
+    Order_Data    := '{'  + Order_Data + '}'
+
+    
+    RETURN        =     (DEBUG or MSG=='OFF') ?  Main_Order_Syntax( 'short',    (Reverse ? 'long' : 'flat' ),    Order_Data )   : MSG
+    RETURN //}
+
+Buy_Exit_Syntax(MSG, PRICE=0.0, QTY=0.0, Delay=0.0)    =>  //{
+    Exit_Data = ''
+    if Delay!=0
+        Exit_Data += (Exit_Data=='' ? '' : ',') + str.format('"DL" : "{0}"',          str.tostring(Delay, "#.##")  )
+    if QTY!=0
+        Exit_Data += (Exit_Data=='' ? '' : ',') + str.format('"QTY_PERCENT" : "{0}"', str.tostring(QTY,   "#.##")  )
+    // if PRICE!=0
+    //     Exit_Data += (Exit_Data=='' ? '' : ',') + str.format('"PRICE" : "{0}"',       str.tostring(PRICE, "#.##")  )
+    if Exit_Data!=''
+        Exit_Data    := '{'  + Exit_Data + '}'
+
+
+    Order_Data    = '{ "SHORT":[],"LONG":[],"CLOSE_SHORT":[],"CLOSE_LONG":['+ Exit_Data +']}'
+    
+    RETURN        =     (DEBUG or MSG=='OFF') ?  Main_Order_Syntax('flat', 'long', Order_Data )   : MSG
+    RETURN //}
+
+Sell_Exit_Syntax(MSG, PRICE=0.0, QTY=0.0, Delay=0.0)   =>  //{
+    Exit_Data = ''
+    if Delay!=0
+        Exit_Data += (Exit_Data=='' ? '' : ',') + str.format('"DL" : "{0}"',          str.tostring(Delay, "#.##")  )
+    if QTY!=0
+        Exit_Data += (Exit_Data=='' ? '' : ',') + str.format('"QTY_PERCENT" : "{0}"', str.tostring(QTY,   "#.##")  )
+    // if PRICE!=0
+    //     Exit_Data += (Exit_Data=='' ? '' : ',') + str.format('"PRICE" : "{0}"',       str.tostring(PRICE, "#.##")  )
+    if Exit_Data!=''
+        Exit_Data    := '{'  + Exit_Data + '}'
+
+
+    Order_Data    = '{ "SHORT":[],"LONG":[],"CLOSE_LONG":[],"CLOSE_SHORT":['+ Exit_Data +']}'
+
+    RETURN        =     (DEBUG or MSG=='OFF') ?  Main_Order_Syntax('flat', 'short', Order_Data )   : MSG
+    RETURN //}
+
+
+// **************** Newer Formater } ***********************
+
+
+Algo_Buy_Entry_Syntax  ( MSG, price, Qty=0, Reverse=false, RISK_VALUE=0.0) =>     Buy_Entry_Syntax  ( MSG, price, Qty, Reverse=Reverse, RISK_VALUE=RISK_VALUE)
+Algo_Sell_Entry_Syntax ( MSG, price, Qty=0, Reverse=false, RISK_VALUE=0.0) =>     Sell_Entry_Syntax ( MSG, price, Qty, Reverse=Reverse, RISK_VALUE=RISK_VALUE)
+Algo_Sell_Exit_Syntax  ( MSG, price, Qty=0, Delay=0)       =>     Sell_Exit_Syntax  ( MSG, price, Qty, Delay)
+Algo_Buy_Exit_Syntax   ( MSG, price, Qty=0, Delay=0)       =>     Buy_Exit_Syntax   ( MSG, price, Qty, Delay)
+
+
+
+
+
+// ****************** Algo_Setup_Code-X    } ******************** 
+
+
+
+// **************** Time Settings{ ******************
+// ***********************  Date Filter { *********************** 
+group_date_filter_1     = " 🟥 🟥 🟥  Date Filter ↓ 🟥 🟥 🟥"
+start_date              = input.time(title="Start Date",  defval=timestamp("2023-04-10T00:00:00"), group=group_date_filter_1)
+end_date                = input.time(title="End_ Date",   defval=timestamp("2030-10-10T14:48:00" ), group=group_date_filter_1)  
+Date_Filter()           => (time >= start_date and time <= end_date ? true : false)
+
+// ***********************  Date Filter } *********************** 
+
+
+// ************     Intraday-Filter     { ***************
+
+Group_Gap_Up_Down    = " 🟥 🟥 🟥 Gap_Up_Down-Session-Filters 🟥 🟥 🟥 " //{
+Want_Size_Gap_Up_Down  = input.bool(false, "Want Gap Size A",  inline="Gap_Up_Down_1", group=Group_Gap_Up_Down)
+A_Size_Gap_Up_Down     = input.float(100, "",                 inline="Gap_Up_Down_1", group=Group_Gap_Up_Down)
+B_Size_Gap_Up_Down     = input.float(200, " - B",             inline="Gap_Up_Down_1", group=Group_Gap_Up_Down)
+Session_1_Gap_Up_Down  = (na(time(timeframe.period, input.session("0923-2359", "Session Start [Below A] @ ", group=Group_Gap_Up_Down) )  ) ? false : true) 
+Session_2_Gap_Up_Down  = (na(time(timeframe.period, input.session("0930-2359", "Session Start [B/W A-B] @ ", group=Group_Gap_Up_Down) )  ) ? false : true) 
+Session_3_Gap_Up_Down  = (na(time(timeframe.period, input.session("0945-2359", "Session Start [Above B] @ ", group=Group_Gap_Up_Down) )  ) ? false : true) 
+
+var Day_Gap_Size       = 0.0, Day_Gap_Size:= dayofmonth!=dayofmonth[1] ? math.abs(open-close[1]) :  Day_Gap_Size
+Session_Gap_Up_Down()  =>Want_Size_Gap_Up_Down ? ( Day_Gap_Size < A_Size_Gap_Up_Down ? Session_1_Gap_Up_Down : Day_Gap_Size < B_Size_Gap_Up_Down ? Session_2_Gap_Up_Down : Session_3_Gap_Up_Down ) : true
+// }
+
+
+
+Group_Entry_Time_1     = " 🟥 🟥 🟥 Session-Filters 🟥 🟥 🟥 " //{
+Draw_Entry_Area        = input.bool(    false,         "Highlight Valid Entry Session Area",     inline="Iday_Entry_Time", group=Group_Entry_Time_1)
+
+Want_Entry_Session_1   = input.bool(false, "Want Entry Session_1",   inline="Iday_Entry_Time_1", group=Group_Entry_Time_1)
+Want_Entry_Session_2   = input.bool(false, "Want Entry Session_2",   inline="Iday_Entry_Time_2", group=Group_Entry_Time_1)
+Want_No_Entry_Session  = input.bool(false, "Want No_Entry Session",  inline="Iday_Exit_Time",    group=Group_Entry_Time_1)
+Entry_Session_1        = input.session("0100-1640", "",              inline="Iday_Entry_Time_1", group=Group_Entry_Time_1)
+Entry_Session_2        = input.session("0100-1640", "",              inline="Iday_Entry_Time_2", group=Group_Entry_Time_1)
+No_Entry_Session       = input.session("1515-1640", "",              inline="Iday_Exit_Time",    group=Group_Entry_Time_1)
+
+Time_Entry_1()         => Want_Entry_Session_1 ?  (na(time(timeframe.period, Entry_Session_1)) ? false :  true) : true
+Time_Entry_2()         => Want_Entry_Session_2 ?  (na(time(timeframe.period, Entry_Session_2)) ? false :  true) : true
+Time_No_Entry()        => Want_No_Entry_Session ? (na(time(timeframe.period, No_Entry_Session))? true  : false) : true
+// }
+
+Time_Entry()           => Time_Entry_1() and Time_Entry_2() and Time_No_Entry() and Date_Filter() and Session_Gap_Up_Down()
+bgcolor( Time_Entry()   and Draw_Entry_Area  ? color.new(color.green, 88)  : na, title="Entry_Session()")
+
+
+
+Group_Exit_Time_1       = " 🟥 🟥 🟥 Square OFF Time 🟥 🟥 🟥 " //{
+Want_Exit_Session       = input.bool(false, "Want Exit Session",         inline="Iday_Exit_Time", group=Group_Exit_Time_1)
+Exit_Session            = input.session("1515-1640", "",                inline="Iday_Exit_Time", group=Group_Exit_Time_1)
+Draw_Exit_Area          = input.bool(    false,       "Highlight",      inline="Iday_Exit_Time", group=Group_Exit_Time_1)
+Time_Exit()             => Want_Exit_Session ? (na(time(timeframe.period, Exit_Session)) ? false : true)    : false
+bgcolor(Time_Exit()   and Draw_Exit_Area and Want_Exit_Session ? color.new(color.red, 88)  : na, title="Exit_Time()")
+// }
+
+
+
+// ************ Intraday-Filter     } ***************
+
+
+
+// ***********************  Time Settings  } *********************** 
+
+// **************** EMA         { ******************
+group_EMA_1         = "🟥 🟥 🟥 EMA/SMA Setting 🟥 🟥 🟥"
+Want_EMA__Trend_1   = input.bool(true, 'EMA 1',         inline = "0", group = group_EMA_1)
+Want_EMA__Trend_2   = input.bool(true, 'EMA 2',         inline = "1", group = group_EMA_1)
+Want_EMA__Trend_3   = input.bool(false,'SMA 3',         inline = "2", group = group_EMA_1)
+
+EMA__Length_1       = input.int(5,      "",             inline = "0", group = group_EMA_1)
+EMA__Length_2       = input.int(20,     "",             inline = "1", group = group_EMA_1)
+EMA__Length_3       = input.int(200,    "",             inline = "2", group = group_EMA_1)
+
+
+Want_EMA_1__Touch_0 = input.bool(false,  '[ 0 ] Touch',  inline = "0", group = group_EMA_1)
+Want_EMA_2__Touch_0 = input.bool(false,  '[ 0 ] Touch',  inline = "1", group = group_EMA_1)
+Want_EMA_3__Touch_0 = input.bool(false, '[ 0 ] Touch',  inline = "2", group = group_EMA_1)
+
+Want_EMA_1__Touch_1 = input.bool(false,  '[ -1 ]',       inline = "0", group = group_EMA_1)
+Want_EMA_2__Touch_1 = input.bool(false, '[ -1 ]',       inline = "1", group = group_EMA_1)
+Want_EMA_3__Touch_1 = input.bool(false, '[ -1 ]',       inline = "2", group = group_EMA_1)
+
+
+
+Want_EMA_1_EMA_2__Seq   = input.bool(false, 'Sequence EMA 1 & EMA 2',        group = group_EMA_1)
+Want_EMA_1_EMA_3__Seq   = input.bool(false, 'Sequence EMA 1 & SMA 3',        group = group_EMA_1)
+Want_EMA_2_EMA_3__Seq   = input.bool(false, 'Sequence EMA 2 & SMA 3',        group = group_EMA_1)
+
+// Trigger_Break_At_Touch  = input.bool(false, 'Tg Brk By Ec At Running Candle', inline = "4", group = group_EMA_1)
+// Trigger_Break_At_Close  = input.bool(false, 'Tg Brk By Ec At Close',          inline = "5", group = group_EMA_1)
+// emaLineCross            = input.bool(false, 'Line Cross ',                    inline = "6", group = group_EMA_1)
+// emaPriceCross           = input.bool(false, 'Price Cross',                    inline = "7", group = group_EMA_1)
+
+EMA__Value_1        = ta.ema(close, EMA__Length_1)
+EMA__Value_2        = ta.ema(close, EMA__Length_2)
+EMA__Value_3        = ta.sma(close, EMA__Length_3)
+
+plot(Want_EMA__Trend_1 ? EMA__Value_1 : na, "EMA_1", color.gray,    1, plot.style_stepline)
+plot(Want_EMA__Trend_2 ? EMA__Value_2 : na, "EMA_2", color.red,     1, plot.style_stepline)
+plot(Want_EMA__Trend_3 ? EMA__Value_3 : na, "SMA_3", color.yellow,  1, plot.style_stepline)
+
+
+
+
+EMA__Trend_1            = Want_EMA__Trend_1     ?  close >= EMA__Value_1 ? 1 : -1                   : 0
+EMA__Trend_2            = Want_EMA__Trend_2     ?  close >= EMA__Value_2 ? 1 : -1                   : 0
+EMA__Trend_3            = Want_EMA__Trend_3     ?  close >= EMA__Value_3 ? 1 : -1                   : 0
+
+EMA__Seq_Trend_1        = Want_EMA_1_EMA_2__Seq ?  EMA__Value_1 >= EMA__Value_2 ? 1 : -1            : 0
+EMA__Seq_Trend_2        = Want_EMA_1_EMA_3__Seq ?  EMA__Value_1 >= EMA__Value_3 ? 1 : -1            : 0
+EMA__Seq_Trend_3        = Want_EMA_2_EMA_3__Seq ?  EMA__Value_2 >= EMA__Value_3 ? 1 : -1            : 0
+
+iEMA__Trend_1           = close >= EMA__Value_1 ? 1 : -1                   
+iEMA__Trend_2           = close >= EMA__Value_2 ? 1 : -1                   
+iEMA__Trend_3           = close >= EMA__Value_3 ? 1 : -1                   
+
+iEMA__Seq_Trend_1       = EMA__Value_1 >= EMA__Value_2 ? 1 : -1            
+iEMA__Seq_Trend_2       = EMA__Value_1 >= EMA__Value_3 ? 1 : -1            
+iEMA__Seq_Trend_3       = EMA__Value_2 >= EMA__Value_3 ? 1 : -1            
+
+
+
+EMA_1__Touch            = high>=EMA__Value_1 and EMA__Value_1>=low    
+EMA_2__Touch            = high>=EMA__Value_2 and EMA__Value_2>=low    
+EMA_3__Touch            = high>=EMA__Value_3 and EMA__Value_3>=low    
+
+EMA_1_Touch_Check        =    ( Want_EMA_1__Touch_0 and Want_EMA_1__Touch_1 )  ? (  EMA_1__Touch or EMA_1__Touch[1]  ) 
+                             : Want_EMA_1__Touch_0                             ?    EMA_1__Touch  
+                             : Want_EMA_1__Touch_1                             ?    EMA_1__Touch[1]   
+                             : false
+EMA_2_Touch_Check        =    ( Want_EMA_2__Touch_0 and Want_EMA_2__Touch_1 )  ? (  EMA_2__Touch or EMA_2__Touch[1]  ) 
+                             : Want_EMA_2__Touch_0                             ?    EMA_2__Touch  
+                             : Want_EMA_2__Touch_1                             ?    EMA_2__Touch[1]   
+                             : false
+EMA_3_Touch_Check        =    ( Want_EMA_3__Touch_0 and Want_EMA_3__Touch_1 )  ? (  EMA_3__Touch or EMA_3__Touch[1]  ) 
+                             : Want_EMA_3__Touch_0                             ?    EMA_3__Touch  
+                             : Want_EMA_3__Touch_1                             ?    EMA_3__Touch[1]   
+                             : false
+
+EMA_Touch_Test_All      =     (  Want_EMA_1__Touch_0 
+                             or  Want_EMA_1__Touch_1 
+                             or  Want_EMA_2__Touch_0 
+                             or  Want_EMA_2__Touch_1 
+                             or  Want_EMA_3__Touch_0 
+                             or  Want_EMA_3__Touch_1 )==false ? true :  (EMA_1_Touch_Check or EMA_2_Touch_Check or EMA_3_Touch_Check)
+
+
+// **************** EMA } ******************
+
+// **************** SPT         { ******************
+
+SPT(Repaint , Periods, src, Multiplier,  changeATR) =>
+    atr2 = ta.sma(ta.tr, Periods)
+    atr = changeATR ? ta.atr(Periods) : atr2
+    up = src - Multiplier * atr
+    up1 = nz(up[1], up)
+    up := close[1] > up1 ? math.max(up, up1) : up
+    dn = src + Multiplier * atr
+    dn1 = nz(dn[1], dn)
+    dn := close[1] < dn1 ? math.min(dn, dn1) : dn
+    trend = 1
+    trend := nz(trend[1], trend)
+    trend := trend == -1 and close > dn1 ? 1 : trend == 1 and close < up1 ? -1 : trend
+    buySignal = trend == 1 and trend[1] == -1
+    sellSignal = trend == -1 and trend[1] == 1
+    changeCond = trend != trend[1]
+    [buySignal[Repaint], sellSignal[Repaint], trend[Repaint], up[Repaint], dn[Repaint]]
+
+
+// indexHighTF(TF)   => ( TF=='' or TF==timeframe.period) ? 0  : barstate.isrealtime ? 1:0
+// indexCurrTF(TF)   => ( TF=='' or TF==timeframe.period) ? 0  : barstate.isrealtime ? 0:1
+
+
+
+
+Strategy_setting_SPT_1  = '🟥🟥🟥 Supertrend_1  ↓  🟥🟥🟥'
+
+
+Want_SPT_1           = input.bool(false , title = "Want_SPT__1" ,                            group = Strategy_setting_SPT_1)
+SPT_1_Periods        = input.int(title='ATR Period', defval=7 ,                              group = Strategy_setting_SPT_1)
+SPT_1_src            = input.source(hl2, title='Source' ,                                    group = Strategy_setting_SPT_1)
+SPT_1_Multiplier     = input.float(title='ATR Multiplier', step=0.1, defval=2.0 ,            group = Strategy_setting_SPT_1)
+SPT_1_changeATR      = input(title='Change ATR Calculation Method ?', defval=true ,          group = Strategy_setting_SPT_1)
+
+[SPT_1_buySignal, SPT_1_sellSignal, SPT_1_trend, SPT_1_up, SPT_1_dn] = SPT(0 , SPT_1_Periods, SPT_1_src, SPT_1_Multiplier,  SPT_1_changeATR)
+
+SPT_1_upPlot    = plot( Want_SPT_1 ? (SPT_1_trend == 1 ? SPT_1_up : na) : na, title='Up_Trend_1',   style=plot.style_linebr, linewidth=2, color=color.new(color.green, 0) )
+SPT_1_dnPlot    = plot( Want_SPT_1 ? (SPT_1_trend == 1 ? na : SPT_1_dn) : na, title='Down_Trend_1', style=plot.style_linebr, linewidth=2, color=color.new(color.red,   0) )
+
+SPT_1__Value    = SPT_1_trend == 1 ? SPT_1_up : SPT_1_dn
+
+
+
+Buy_SPT_1       = Want_SPT_1 ?  SPT_1_trend==  1   : true  
+Sell_SPT_1      = Want_SPT_1 ?  SPT_1_trend== -1   : true  
+iBuy_SPT_1      = SPT_1_trend==  1 
+iSell_SPT_1     = SPT_1_trend== -1 
+
+// bgcolor(Buy_SPT_1   ? color.new(color.green,88) : na)
+// bgcolor(Sell_SPT_1  ? color.new(color.red,  88) : na)
+
+// **************** SPT } ******************
+
+// **************** Avg_Force   { ******************
+group_AF   = "🟥 🟥 🟥 Avg_Force  🟥 🟥 🟥"
+Want_Avg_Force = input.bool(false, title = "Want Avg Force", group = group_AF)
+af(Series, High, Low, Period, PostSmooth) =>
+    period       =     math.max(1, int(Period))
+    highestHigh  = ta.highest(High,  period)
+    lowestLow    =  ta.lowest( Low,  period)
+    HHminusLL    = highestHigh - lowestLow
+    averageForce = HHminusLL==0.0 ? 0.0 : (Series - lowestLow) / HHminusLL - 0.5
+    ta.sma(averageForce, math.max(1, int(PostSmooth)))
+
+period  = input.int(18, "Period",  minval=1)
+smooth  = input.int( 6, "Smooth",  minval=1)
+
+AF      =  af(close, high, low, period, smooth) 
+// Color   = AF>0.0 ? color.yellow : color.fuchsia
+// plot(AF, color=Color, style=plot.style_columns)
+
+Buy_Avg_Force_1  = Want_Avg_Force ? AF >= 0.0 : true
+Sell_Avg_Force_1 = Want_Avg_Force ? AF <= 0.0 : true 
+iBuy_Avg_Force_1  = AF >= 0.0 
+iSell_Avg_Force_1 = AF <= 0.0 
+
+// bgcolor(Buy_Avg_Force_1  ? color.new(color.green,88) : na)
+// bgcolor(Sell_Avg_Force_1 ? color.new(color.red,  88) : na)
+
+// ****************  Avg_Force  } *****************
+
+// **************** Half_Trend  { ******************
+group_1   = "🟥 🟥 🟥 Half_Trend  🟥 🟥 🟥"
+
+Want_HT              = input.bool(title = "Want_Half_Trend", defval = false, group=group_1 )
+amplitude            = input.int(title="Amplitude",         defval=2      , group=group_1 )
+channelDeviation     = input.int(title="Channel Deviation", defval=2      , group=group_1 )
+// showArrows           = input.bool(title="Show Arrows",      defval=true   , group=group_1 )
+// showChannels         = input.bool(title="Show Channels",    defval=true   , group=group_1 )
+
+Func_Halftrend() =>  //{
+    var int trend = 0
+    var int nextTrend = 0
+    var float maxLowPrice = nz(low[1], low)
+    var float minHighPrice = nz(high[1], high)
+
+    var float up = 0.0
+    var float down = 0.0
+    float atrHigh = 0.0
+    float atrLow = 0.0
+    float arrowUp = na
+    float arrowDown = na
+
+    atr2_x = ta.atr(100) / 2
+    atr2   = atr2_x
+    dev    = channelDeviation * atr2
+
+    highPrice = high[math.abs(ta.highestbars(high, amplitude))]
+    lowPrice = low[math.abs(ta.lowestbars(low, amplitude))]
+    highma = ta.sma(high, amplitude)
+    lowma = ta.sma(low, amplitude)
+
+    if nextTrend == 1
+        maxLowPrice := math.max(lowPrice, maxLowPrice)
+
+        if highma < maxLowPrice and close < nz(low[1], low)
+            trend := 1
+            nextTrend := 0
+            minHighPrice := highPrice
+    else
+        minHighPrice := math.min(highPrice, minHighPrice)
+
+        if lowma > minHighPrice and close > nz(high[1], high)
+            trend := 0
+            nextTrend := 1
+            maxLowPrice := lowPrice
+
+    if trend == 0
+        if not na(trend[1]) and trend[1] != 0
+            up := na(down[1]) ? down : down[1]
+            arrowUp := up - atr2
+        else
+            up := na(up[1]) ? maxLowPrice :math.max(maxLowPrice, up[1])
+        atrHigh := up + dev
+        atrLow := up - dev
+    else
+        if not na(trend[1]) and trend[1] != 1 
+            down := na(up[1]) ? up : up[1]
+            arrowDown := down + atr2
+        else
+            down := na(down[1]) ? minHighPrice :math.min(minHighPrice, down[1])
+        atrHigh := down + dev
+        atrLow := down - dev
+    
+    [up,down, trend]  //}
+
+[up,down, trend] = Func_Halftrend()
+
+ht = trend == 0 ? up : down
+
+var color buyColor = color.blue
+var color sellColor = color.red
+
+htColor = trend == 0 ? buyColor : sellColor
+htPlot = plot(Want_HT ? ht : na , title="HalfTrend", linewidth=2, color=htColor)
+
+
+
+// buySignal  = not na(arrowUp) and (trend == 0 and trend[1] == 1)
+// sellSignal = not na(arrowDown) and (trend == 1 and trend[1] == 0)
+
+// plotshape(showArrows and buySignal ? atrLow : na, title="Arrow Up", style=shape.triangleup, location=location.absolute, size=size.tiny, color=buyColor)
+// plotshape(showArrows and sellSignal ? atrHigh : na, title="Arrow Down", style=shape.triangledown, location=location.absolute, size=size.tiny, color=sellColor)
+
+
+Buy_HT_1   = Want_HT ? trend == 0 : true
+Sell_HT_1  = Want_HT ? trend != 0 : true
+iBuy_HT_1  = trend == 0 
+iSell_HT_1 = trend != 0 
+
+
+// ******************* Half_Trend } *************
+
+// **************** RSI         { ******************
+group_RSI_1         = "🟥 🟥 🟥 RSI Settings  🟥 🟥 🟥"
+Want_RSI_1          = input.bool(false,    "Want_RSI_1",         group = group_RSI_1)
+Source__RSI_1       = input.source(close,  "Source",             group = group_RSI_1)
+Length__RSI_1       = input.int(14,        "Length",             group = group_RSI_1)
+Buy_Above__RSI_1    = input.float(60,      "Buy_Above__RSI_1",   group = group_RSI_1)
+Sell_Below__RSI_1   = input.float(40,      "Sell_Below__RSI_1",  group = group_RSI_1)
+Value_RSI_1         = ta.rsi(Source__RSI_1, Length__RSI_1)
+
+Buy_RSI_1           = Want_RSI_1 ? Value_RSI_1 >  Buy_Above__RSI_1 : true
+Sell_RSI_1          = Want_RSI_1 ? Value_RSI_1 < Sell_Below__RSI_1 : true 
+iBuy_RSI_1          =  Value_RSI_1 >  Buy_Above__RSI_1 
+iSell_RSI_1         =  Value_RSI_1 < Sell_Below__RSI_1 
+// ****************  RSI  } *****************
+
+// **************** Candle Defination{ *************
+Range         = high - low
+Body          = math.abs(close-open)
+Green_Candle  = close>open
+Red_Candle    = close<open
+
+group_Candle_1                   = "🟥 🟥 🟥 Candle Defination  🟥 🟥 🟥"
+Trigger_Candle_Color             = input.color(color.yellow,     "Trigger_Candle_Color",                          group = group_Candle_1)
+Entry_Candle_Color               = input.color(color.blue,       "Entry_Candle_Color",                            group = group_Candle_1)
+Want_Trigger_Candle_Max_Size     = input.bool( false,   "Trigger_Candle_Max_Size", inline="Candle Defination_1",     group = group_Candle_1)
+Trigger_Candle_Max_Size          = input.float(50,     "",      inline="Candle Defination_1",                       group = group_Candle_1)
+
+Want_Trigger_Candle_Bullish      = input.bool(true,     "Want_Trigger_Candle_Bullish", inline="Candle Defination_2", group = group_Candle_1)
+Trigger_Candle_Bullish_Body_Size = input.float(1,      "- Body Size % >  ",           inline="Candle Defination_2", group = group_Candle_1)*0.01
+
+Want_Trigger_Candle_Bearish      = input.bool(true,     "Want_Trigger_Candle_Bearish", inline="Candle Defination_3", group = group_Candle_1)
+Trigger_Candle_Bearish_Body_Size = input.float(1,      "- Body Size % >  ",           inline="Candle Defination_3", group = group_Candle_1)*0.01
+
+
+Buy_Trigger_Candle_Bullish       = (Want_Trigger_Candle_Max_Size ? Range<=Trigger_Candle_Max_Size : true) and Body>=(Range*Trigger_Candle_Bullish_Body_Size)and(Want_Trigger_Candle_Bullish?Green_Candle :true) 
+Sell_Trigger_Candle_Bearish      = (Want_Trigger_Candle_Max_Size ? Range<=Trigger_Candle_Max_Size : true) and Body>=(Range*Trigger_Candle_Bearish_Body_Size)and(Want_Trigger_Candle_Bearish?Red_Candle   :true) 
+
+// **************** Candle Defination         } ******************
+
+
+
+// **************** Main Calculations         { ******************
+
+
+// ******** Variables {
+var Buy_Counter__After   = 0
+var Sell_Counter__After  = 0 
+if strategy.position_size>0 
+    Buy_Counter__After     += 1
+else
+    Buy_Counter__After     := 0
+if strategy.position_size<0 
+    Sell_Counter__After     += 1
+else
+    Sell_Counter__After     := 0
+
+var Buy_Counter          = 0, Buy_Counter            += 1
+var Buy_Trigger_Counter  = 0, Buy_Trigger_Counter    += 1, Buy_Trigger_Counter    := dayofmonth!=dayofmonth[1] ? na : Buy_Trigger_Counter    
+var Buy_Trigger_Type     = ""
+var Buy_EP_Strike        = 0.0
+var Sell_EP_Strike       = 0.0
+var Buy_EP_Price         = 0.0
+var Buy_SL_Price         = 0.0
+var Buy_TP_1_Price       = 0.0
+var Buy_TP_2_Price       = 0.0
+var Buy_TP_3_Price       = 0.0
+var Buy_TP_1_Qty         = 0.0
+var Buy_TP_2_Qty         = 0.0
+var Buy_TP_3_Qty         = 0.0
+var Buy_Qty              = 0.0
+
+
+var Sell_Counter         = 0, Sell_Counter           += 1
+var Sell_Trigger_Counter = 0, Sell_Trigger_Counter   += 1, Sell_Trigger_Counter   := dayofmonth!=dayofmonth[1] ? na : Sell_Trigger_Counter   
+var Sell_Trigger_Type    = ""
+var Sell_EP_Price        = 0.0
+var Sell_SL_Price        = 0.0
+var Sell_TP_1_Price      = 0.0
+var Sell_TP_2_Price      = 0.0
+var Sell_TP_3_Price      = 0.0
+var Sell_TP_1_Qty        = 0.0
+var Sell_TP_2_Qty        = 0.0
+var Sell_TP_3_Qty        = 0.0
+var Sell_Qty             = 0.0
+// }
+
+group_Token_Repeat_1 = "🟥 🟥 🟥 Token_Repeat Setting 🟥 🟥 🟥" //{
+Want_Token_Repeat__At_No_Pos   = input.bool(true,  'Token_Repeat__Only_At_No__Open_Position', group = group_Token_Repeat_1) ? strategy.position_size!=0 : false
+Want_Token_Repeat__EMA_1       = input.bool(false, 'EMA_1',         group = group_Token_Repeat_1) 
+Want_Token_Repeat__EMA_2       = input.bool(false, 'EMA_2',         group = group_Token_Repeat_1) 
+Want_Token_Repeat__EMA_3       = input.bool(false, 'SMA_3',         group = group_Token_Repeat_1) 
+Want_Token_Repeat__SPT_1       = input.bool(false, 'SPT_1',         group = group_Token_Repeat_1) 
+Want_Token_Repeat__HT_1        = input.bool(false, 'HT_1 ',         group = group_Token_Repeat_1) 
+Want_Token_Repeat__AF_1        = input.bool(false, 'AF_1 ',         group = group_Token_Repeat_1) 
+Want_Token_Repeat__EMA_1_EMA_2 = input.bool(false, 'EMA_1_X_EMA_2', group = group_Token_Repeat_1) 
+
+group_Entry_1        = "🟥 🟥 🟥 Entry Setting 🟥 🟥 🟥"
+Entry_Type_Touch     = input.string(  "Touch",   'Entry_type',  options=["Touch", "Closing"],     group = group_Entry_1)=="Touch"
+Entry_Buffer_Points  = input.float(0.01, 'Entry_Buffer_Points',                 minval=0.01,      group = group_Entry_1) 
+Condition_Type       = input.string("B", 'Condition_Type',  options=["A", "B", "C"],              group = group_Entry_1) 
+Entry_Buffer_Candles = Condition_Type!="B" ?  2 : input.int(2,   'Condition_B Breakout Candles', group = group_Entry_1) 
+
+Token_Check(Want_Token, Token_Trend, Token_Trigger )=>
+    Return = false
+    if Want_Token
+        var Token_Refresh  = false 
+        if Token_Trend==false  
+            Token_Refresh := true 
+        if  (na(Token_Trigger)==false and Entry_Buffer_Candles >= Token_Trigger) or Want_Token_Repeat__At_No_Pos
+            Token_Refresh := false
+
+        Return := Token_Refresh and Token_Trend 
+    Return 
+
+Buy_Token_Repeat__EMA_1        = Token_Check(Want_Token_Repeat__EMA_1   ,      iEMA__Trend_1>0       , Buy_Trigger_Counter  )
+Buy_Token_Repeat__EMA_2        = Token_Check(Want_Token_Repeat__EMA_2   ,      iEMA__Trend_2>0       , Buy_Trigger_Counter  )
+Buy_Token_Repeat__EMA_3        = Token_Check(Want_Token_Repeat__EMA_3   ,      iEMA__Trend_3>0       , Buy_Trigger_Counter  )
+Buy_Token_Repeat__SPT_1        = Token_Check(Want_Token_Repeat__SPT_1   ,      iBuy_SPT_1            , Buy_Trigger_Counter  )
+Buy_Token_Repeat__HT_1         = Token_Check(Want_Token_Repeat__HT_1    ,      iBuy_HT_1             , Buy_Trigger_Counter  )
+Buy_Token_Repeat__AF_1         = Token_Check(Want_Token_Repeat__AF_1    ,      iBuy_Avg_Force_1      , Buy_Trigger_Counter  )
+Buy_Token_Repeat__EMA_1_EMA_2  = Token_Check(Want_Token_Repeat__EMA_1_EMA_2 ,  iEMA__Seq_Trend_1>0   , Buy_Trigger_Counter  )
+
+Sell_Token_Repeat__EMA_1       = Token_Check(Want_Token_Repeat__EMA_1   ,      iEMA__Trend_1<0       , Sell_Trigger_Counter )
+Sell_Token_Repeat__EMA_2       = Token_Check(Want_Token_Repeat__EMA_2   ,      iEMA__Trend_2<0       , Sell_Trigger_Counter )
+Sell_Token_Repeat__EMA_3       = Token_Check(Want_Token_Repeat__EMA_3   ,      iEMA__Trend_3<0       , Sell_Trigger_Counter )
+Sell_Token_Repeat__SPT_1       = Token_Check(Want_Token_Repeat__SPT_1   ,      iSell_SPT_1           , Sell_Trigger_Counter )
+Sell_Token_Repeat__HT_1        = Token_Check(Want_Token_Repeat__HT_1    ,      iSell_HT_1            , Sell_Trigger_Counter )
+Sell_Token_Repeat__AF_1        = Token_Check(Want_Token_Repeat__AF_1    ,      iSell_Avg_Force_1     , Sell_Trigger_Counter )
+Sell_Token_Repeat__EMA_1_EMA_2 = Token_Check(Want_Token_Repeat__EMA_1_EMA_2 ,  iEMA__Seq_Trend_1<0   , Sell_Trigger_Counter )
+
+Buy_Token_Repeat  =  Buy_Token_Repeat__EMA_1 or  Buy_Token_Repeat__EMA_2 or  Buy_Token_Repeat__EMA_3 or  Buy_Token_Repeat__SPT_1 or  Buy_Token_Repeat__HT_1 or  Buy_Token_Repeat__AF_1 or  Buy_Token_Repeat__EMA_1_EMA_2  
+Sell_Token_Repeat = Sell_Token_Repeat__EMA_1 or Sell_Token_Repeat__EMA_2 or Sell_Token_Repeat__EMA_3 or Sell_Token_Repeat__SPT_1 or Sell_Token_Repeat__HT_1 or Sell_Token_Repeat__AF_1 or Sell_Token_Repeat__EMA_1_EMA_2  
+
+// }
+
+group_SL_Price_1     = "🟥 🟥 🟥 SL_Price Setting 🟥 🟥 🟥" //{
+Want_Max_SL_Points              = input.bool(false,  'Maximum_SL_Points', inline="Maximum_SL_Points",                 group = group_SL_Price_1 ) 
+Max_SL_Points                   = input.float(50,   '',                  inline="Maximum_SL_Points",                 group = group_SL_Price_1 ) 
+Want_Min_SL_Points              = input.bool(false,  'Minimum_SL_Points', inline="Minimum_SL_Points",                 group = group_SL_Price_1 ) 
+Min_SL_Points                   = input.float(50,   '',                  inline="Minimum_SL_Points",                 group = group_SL_Price_1 ) 
+Calc_SL_Price__Type__Nearby     = input.string("Nearby", 'Calculations for SL_Price', options=["Nearby", "Faraway"], group = group_SL_Price_1 ) =="Nearby"
+Want_SL_Price__Trigger_Candle   = input.bool(true,  'Trigger_Candle',     group = group_SL_Price_1 ) 
+Want_SL_Price__EMA_1            = input.bool(false, 'EMA_1',              group = group_SL_Price_1 ) 
+Want_SL_Price__EMA_2            = input.bool(false, 'EMA_2',              group = group_SL_Price_1 ) 
+Want_SL_Price__EMA_3            = input.bool(false, 'SMA_3',              group = group_SL_Price_1 ) 
+Want_SL_Price__SPT_1            = input.bool(false, 'SPT_1',              group = group_SL_Price_1 ) 
+Want_SL_Price__HT_1             = input.bool(false, 'HT_1 ',              group = group_SL_Price_1 ) 
+// Calc_SL_Price(Price_1, Price_2, Dir)   => Calc_SL_Price__Type__Nearby ? (Dir=="Buy" ? math.max(Price_1, Price_2) : math.min(Price_1, Price_2) ) : (Dir=="Sell" ? math.max(Price_1, Price_2) : math.min(Price_1, Price_2) ) 
+Calc_SL_Price(EP_Price ,Price_1, Price_2, Dir)   => 
+    Diff_1  = math.abs(EP_Price - Price_1)
+    Diff_2  = math.abs(EP_Price - Price_2)
+    Return  = Calc_SL_Price__Type__Nearby ? math.min(Diff_1, Diff_2) : math.max(Diff_1, Diff_2) 
+    Return  := Dir=="Buy" ? EP_Price - Return : EP_Price + Return
+    Return
+
+
+iBuy_EP_Price   = high
+iSell_EP_Price  = low
+iBuy_SL_Price   = float(na) 
+iSell_SL_Price  = float(na) 
+if Want_SL_Price__Trigger_Candle
+    iBuy_SL_Price   := Calc_SL_Price(iBuy_EP_Price  , nz(iBuy_SL_Price  , low  ),         low  ,        "Buy"   )
+    iSell_SL_Price  := Calc_SL_Price(iSell_EP_Price , nz(iSell_SL_Price , high ),         high ,        "Sell"  )
+if Want_SL_Price__EMA_1  
+    iBuy_SL_Price   := Calc_SL_Price(iBuy_EP_Price  , nz(iBuy_SL_Price  , EMA__Value_1 ), EMA__Value_1, "Buy"   )
+    iSell_SL_Price  := Calc_SL_Price(iSell_EP_Price , nz(iSell_SL_Price , EMA__Value_1 ), EMA__Value_1, "Sell"  )
+if Want_SL_Price__EMA_2  
+    iBuy_SL_Price   := Calc_SL_Price(iBuy_EP_Price  , nz(iBuy_SL_Price  , EMA__Value_2 ), EMA__Value_2, "Buy"   )
+    iSell_SL_Price  := Calc_SL_Price(iSell_EP_Price , nz(iSell_SL_Price , EMA__Value_2 ), EMA__Value_2, "Sell"  )
+if Want_SL_Price__EMA_3  
+    iBuy_SL_Price   := Calc_SL_Price(iBuy_EP_Price  , nz(iBuy_SL_Price  , EMA__Value_3 ), EMA__Value_3, "Buy"   )
+    iSell_SL_Price  := Calc_SL_Price(iSell_EP_Price , nz(iSell_SL_Price , EMA__Value_3 ), EMA__Value_3, "Sell"  )
+  
+if Want_SL_Price__SPT_1  
+    iBuy_SL_Price   := Calc_SL_Price(iBuy_EP_Price  , nz(iBuy_SL_Price  , SPT_1__Value ), SPT_1__Value, "Buy"   )
+    iSell_SL_Price  := Calc_SL_Price(iSell_EP_Price , nz(iSell_SL_Price , SPT_1__Value ), SPT_1__Value, "Sell"  )
+if Want_SL_Price__HT_1  
+    iBuy_SL_Price   := Calc_SL_Price(iBuy_EP_Price  , nz(iBuy_SL_Price  , ht           ), ht          , "Buy"   )
+    iSell_SL_Price  := Calc_SL_Price(iSell_EP_Price , nz(iSell_SL_Price , ht           ), ht          , "Sell"  )
+
+
+Buy__SL_Points       = math.abs(nz(iBuy_SL_Price,  low   ) - iBuy_EP_Price   ) 
+Sell__SL_Points      = math.abs(nz(iSell_SL_Price, high  ) - iSell_EP_Price  ) 
+Buy__SL_Test__Max    = Want_Max_SL_Points  ? (Buy__SL_Points   <= Max_SL_Points) : true
+Sell__SL_Test__Max   = Want_Max_SL_Points  ? (Sell__SL_Points  <= Max_SL_Points) : true
+Buy__SL_Test__Min    = Want_Min_SL_Points  ? (Buy__SL_Points   >= Min_SL_Points) : true
+Sell__SL_Test__Min   = Want_Min_SL_Points  ? (Sell__SL_Points  >= Min_SL_Points) : true
+Buy__SL_Test         = Buy__SL_Test__Max   and Buy__SL_Test__Min    
+Sell__SL_Test        = Sell__SL_Test__Max  and Sell__SL_Test__Min   
+
+
+// }
+
+// ****************** Account_Condition { **************
+Group_Account       = "🟥 🟥 🟥 Account  🟥 🟥 🟥"
+Account_Capital     =  strategy.equity //   input.int(1000000,  "Account_Capital",    group = Group_Account)   *  input.float(2,"Leverage", group = Group_Account)
+// Account_Capital     = input.int(1000000,  "Account_Capital",    group = Group_Account)   *  input.float(2,"Leverage", group = Group_Account)
+Risk_Value          = input.float(3,      "Risk Amount %",      group = Group_Account)   *  (Account_Capital*0.01 )
+// Lot_Size            = input.int( 50,      "Lot_Size",           group = Group_Account)  
+Buffer_Lot          = input.int( 0,       "Buffer Lot",         group = Group_Account)  * Lot_Size
+
+Minimum_SL_Points   = input.float(75,    "Minimum SL Points For Qty",  group = Group_Account)  
+Fixed_SL_Points     = input.float(75,    "Fixed   SL Points For Qty (0 Means Off)", minval=0, group = Group_Account)  
+
+iBuy__SL_Points     = math.abs( iBuy_SL_Price  - iBuy_EP_Price  )
+iSell__SL_Points    = math.abs( iSell_SL_Price - iSell_EP_Price )
+
+if Fixed_SL_Points!=0
+    iBuy__SL_Points   := Fixed_SL_Points  
+    iSell__SL_Points  := Fixed_SL_Points  
+else
+    iBuy__SL_Points   := math.max(iBuy__SL_Points  , Minimum_SL_Points)
+    iSell__SL_Points  := math.max(iSell__SL_Points , Minimum_SL_Points)
+
+
+iBuy_Qty             = math.round(Risk_Value/iBuy__SL_Points  )
+iSell_Qty            = math.round(Risk_Value/iSell__SL_Points )
+
+iBuy_Qty            := math.round(iBuy_Qty  /Lot_Size )*Lot_Size 
+iSell_Qty           := math.round(iSell_Qty /Lot_Size )*Lot_Size 
+
+iBuy_Qty            := iBuy_Qty  - Buffer_Lot
+iSell_Qty           := iSell_Qty - Buffer_Lot
+label Account_Label  = na
+if Account_Capital < 0
+    iBuy_Qty        := na
+    iSell_Qty       := na
+    Account_Label   := label.new(bar_index, high, "No Balance " + str.tostring(Account_Capital, format.price), color=color.aqua, textcolor = color.black)
+    label.delete( Account_Label[1]  )
+
+
+// ****************** Account_Condition } **************
+
+// group_Entry_1        = "🟥 🟥 🟥 Entry Setting 🟥 🟥 🟥"
+// Entry_Type_Touch     = input.string(  "Touch",   'Entry_type',  options=["Touch", "Closing"],     group = group_Entry_1)=="Touch"
+// Entry_Buffer_Points  = input.float(0.01, 'Entry_Buffer_Points',                 minval=0.01,      group = group_Entry_1) 
+// Condition_Type       = input.string("A", 'Condition_Type',  options=["A", "B", "C"],              group = group_Entry_1) //{
+// Entry_Buffer_Candles = Condition_Type!="B" ?  2 : input.int(10,   'Condition_B Breakout Candles', group = group_Entry_1) 
+
+
+Buy_Time__Trend      =   Buy_Trigger_Candle_Bullish  and EMA_Touch_Test_All and Buy__SL_Test  
+             and EMA__Trend_1>=0 and EMA__Seq_Trend_1>=0
+             and EMA__Trend_2>=0 and EMA__Seq_Trend_2>=0
+             and EMA__Trend_3>=0 and EMA__Seq_Trend_3>=0
+             and (Want_SPT_1     ? Buy_SPT_1         : true)                        
+             and (Want_Avg_Force ? Buy_Avg_Force_1   : true)                                
+             and (Want_HT        ? Buy_HT_1          : true)                  
+             and (Want_RSI_1     ? Buy_RSI_1         : true)                      
+
+Sell_Time__Trend     =   Sell_Trigger_Candle_Bearish and EMA_Touch_Test_All and Sell__SL_Test 
+             and EMA__Trend_1<=0 and EMA__Seq_Trend_1<=0
+             and EMA__Trend_2<=0 and EMA__Seq_Trend_2<=0
+             and EMA__Trend_3<=0 and EMA__Seq_Trend_3<=0
+             and (Want_SPT_1     ? Sell_SPT_1        : true)                        
+             and (Want_Avg_Force ? Sell_Avg_Force_1  : true)                                
+             and (Want_HT        ? Sell_HT_1         : true)                  
+             and (Want_RSI_1     ? Sell_RSI_1        : true)                      
+
+
+Condition_Type_A     = Condition_Type=="A" //{
+Buy_Time_A__EMA= EMA__Trend_1>=0 and EMA__Seq_Trend_1>=0 
+             and EMA__Trend_2>=0 and EMA__Seq_Trend_2>=0 
+             and EMA__Trend_3>=0 and EMA__Seq_Trend_3>=0 
+Buy_Time_A_x    =   Buy_Time__Trend       and Condition_Type_A
+             and ( (Want_EMA__Trend_1 or Want_EMA__Trend_2 or Want_EMA__Trend_3)  ? Buy_Time_A__EMA and Buy_Time_A__EMA[1]==false : true)
+             and (Want_SPT_1     ? iBuy_SPT_1        and iBuy_SPT_1[1]==false        : true)                        
+             and (Want_Avg_Force ? iBuy_Avg_Force_1  and iBuy_Avg_Force_1[1]==false  : true)                                
+             and (Want_HT        ? iBuy_HT_1         and iBuy_HT_1[1]==false         : true)                  
+             and (Want_RSI_1     ? iBuy_RSI_1        and iBuy_RSI_1[1]==false        : true)                      
+
+Sell_Time_A__EMA=EMA__Trend_1<=0 and EMA__Seq_Trend_1<=0 
+             and EMA__Trend_2<=0 and EMA__Seq_Trend_2<=0 
+             and EMA__Trend_3<=0 and EMA__Seq_Trend_3<=0 
+Sell_Time_A_x   =   Sell_Time__Trend      and Condition_Type_A 
+             and ( (Want_EMA__Trend_1 or Want_EMA__Trend_2 or Want_EMA__Trend_3)  ? Sell_Time_A__EMA and Sell_Time_A__EMA[1]==false : true)
+             and (Want_SPT_1     ? iSell_SPT_1        and iSell_SPT_1[1]==false        : true)                        
+             and (Want_Avg_Force ? iSell_Avg_Force_1  and iSell_Avg_Force_1[1]==false  : true)                                
+             and (Want_HT        ? iSell_HT_1         and iSell_HT_1[1]==false         : true)                  
+             and (Want_RSI_1     ? iSell_RSI_1        and iSell_RSI_1[1]==false        : true)                      
+// Buy_Time_A_x   =   Buy_Time__Trend   and Condition_Type_A 
+// Sell_Time_A_x  =   Sell_Time__Trend  and Condition_Type_A 
+
+var Final_Trend_A = 0
+Buy_Time_A_1    = Buy_Time_A_x  and Final_Trend_A <=0 and Time_Entry() and Time_Exit()==false and strategy.position_size<=0
+Sell_Time_A_1   = Sell_Time_A_x and Final_Trend_A >=0 and Time_Entry() and Time_Exit()==false and strategy.position_size>=0
+if Buy_Time_A_1    
+    Final_Trend_A :=  1
+if Sell_Time_A_1   
+    Final_Trend_A := -1
+Buy_Time_A_2    = Buy_Token_Repeat  and Buy_Time_A_x  and Final_Trend_A > 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size<=0
+Sell_Time_A_2   = Sell_Token_Repeat and Sell_Time_A_x and Final_Trend_A < 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size>=0
+
+Buy_Time_A      = (Buy_Time_A_1   or Buy_Time_A_2   )
+Sell_Time_A     = (Sell_Time_A_1  or Sell_Time_A_2  )
+
+// }
+Condition_Type_B     = Condition_Type=="B" //{
+Buy_Time_B_x   =   Buy_Time__Trend   and Condition_Type_B 
+Sell_Time_B_x  =   Sell_Time__Trend  and Condition_Type_B 
+
+var Final_Trend_B = 0
+Buy_Time_B_1    = Buy_Time_B_x  and Final_Trend_B <=0 and Time_Entry() and Time_Exit()==false and strategy.position_size<=0 and strategy.position_size[1]<=0
+Sell_Time_B_1   = Sell_Time_B_x and Final_Trend_B >=0 and Time_Entry() and Time_Exit()==false and strategy.position_size>=0 and strategy.position_size[1]>=0
+if Buy_Time_B_1    
+    Final_Trend_B :=  1
+if Sell_Time_B_1   
+    Final_Trend_B := -1
+Buy_Time_B_2    = ( na(Buy_Trigger_Counter)  ? Buy_Token_Repeat  :  (Buy_Token_Repeat  and Buy_Trigger_Counter  > Entry_Buffer_Candles)  ) and Buy_Time_B_x  and Final_Trend_B > 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size<=0
+Sell_Time_B_2   = ( na(Sell_Trigger_Counter) ? Sell_Token_Repeat :  (Sell_Token_Repeat and Sell_Trigger_Counter > Entry_Buffer_Candles)  ) and Sell_Time_B_x and Final_Trend_B < 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size>=0
+
+Buy_Time_B      = (Buy_Time_B_1   or Buy_Time_B_2   )
+Sell_Time_B     = (Sell_Time_B_1  or Sell_Time_B_2  )
+// }
+Condition_Type_C     = Condition_Type=="C" //{
+// Buy_Time_C   =   Buy_Time__Trend   and Condition_Type_C 
+// Sell_Time_C  =   Sell_Time__Trend  and Condition_Type_C 
+Buy_Time_C_x   =   Buy_Time__Trend   and Condition_Type_C 
+Sell_Time_C_x  =   Sell_Time__Trend  and Condition_Type_C 
+
+var Final_Trend_C = 0
+
+Buy_Time_C_1    = Buy_Time_C_x  and Final_Trend_C <=0 and Time_Entry() and Time_Exit()==false and strategy.position_size<=0 and strategy.position_size[1]<=0
+Sell_Time_C_1   = Sell_Time_C_x and Final_Trend_C >=0 and Time_Entry() and Time_Exit()==false and strategy.position_size>=0 and strategy.position_size[1]>=0
+if Buy_Time_C_1    
+    Final_Trend_C :=  1
+if Sell_Time_C_1   
+    Final_Trend_C := -1
+Buy_Time_C_2    = (Buy_Token_Repeat  or (Buy_Trigger_Counter  >= Entry_Buffer_Candles) )and Buy_Time_C_x  and Final_Trend_C > 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size<=0
+Sell_Time_C_2   = (Sell_Token_Repeat or (Sell_Trigger_Counter >= Entry_Buffer_Candles) )and Sell_Time_C_x and Final_Trend_C < 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size>=0
+
+
+Buy_Time_C      = (Buy_Time_C_1   or Buy_Time_C_2   )
+Sell_Time_C     = (Sell_Time_C_1  or Sell_Time_C_2  )
+
+
+// }
+Condition_Type_D     = input.bool(false, 'Want_Condition_D',  group = group_Entry_1) //{
+Condition_Type_D__Buy_RSI_UP    = input.float(60, 'Condition_D Buy RSI_Up',   inline="Condition_D_1", group = group_Entry_1) 
+Condition_Type_D__Buy_RSI_DOWN  = input.float(58, 'Down',                     inline="Condition_D_1", group = group_Entry_1) 
+Condition_Type_D__Sell_RSI_UP   = input.float(60, 'Condition_D Sell RSI_Up',  inline="Condition_D_2", group = group_Entry_1) 
+Condition_Type_D__Sell_RSI_DOWN = input.float(58, 'Down',                     inline="Condition_D_2", group = group_Entry_1) 
+Buy_Time_D   =   Buy_Trigger_Candle_Bullish and Condition_Type_D //and EMA_Touch_Test_All 
+            //  and EMA__Trend_1>=0 
+            //  and EMA__Trend_2>=0 
+            //  and EMA__Trend_3>=0 
+            //  and (Want_Avg_Force ? Buy_Avg_Force_1   : true)                                
+            //  and (Want_HT        ? Buy_HT_1          : true)                  
+             and (Want_RSI_1     ? (Value_RSI_1 <= Condition_Type_D__Buy_RSI_UP and Value_RSI_1 >= Condition_Type_D__Buy_RSI_DOWN)        : true)                      
+             and (Want_SPT_1     ? iBuy_SPT_1        : true)                        
+             and low  < SPT_1__Value                      
+
+Sell_Time_D  =   Sell_Trigger_Candle_Bearish and Condition_Type_D //and EMA_Touch_Test_All 
+            //  and EMA__Trend_1<=0 
+            //  and EMA__Trend_2<=0 
+            //  and EMA__Trend_3<=0 
+            //  and (Want_Avg_Force ? Sell_Avg_Force_1  : true)                                
+            //  and (Want_HT        ? Sell_HT_1         : true)                  
+             and (Want_RSI_1     ? (Value_RSI_1 <= Condition_Type_D__Sell_RSI_UP and Value_RSI_1 >= Condition_Type_D__Sell_RSI_DOWN)        : true)                      
+             and (Want_SPT_1     ? iSell_SPT_1       : true)                        
+             and high > SPT_1__Value                      
+// }
+
+
+
+
+Buy_Time__Trigger    = (Buy_Time_A  or Buy_Time_B  or Buy_Time_C  or Buy_Time_D   )and Time_Entry() and Time_Exit()==false  and strategy.position_size<=0 
+Sell_Time__Trigger   = (Sell_Time_A or Sell_Time_B or Sell_Time_C or Sell_Time_D  )and Time_Entry() and Time_Exit()==false  and strategy.position_size>=0 
+
+
+// bgcolor( Buy_Time__Trigger   ? color.rgb(0, 230, 119, 63) : na )
+// bgcolor( Sell_Time__Trigger  ? color.rgb(255, 82, 82, 62) : na )
+
+
+// BarColor =  Buy_Time or Sell_Time  ? Trigger_Candle_Color : na 
+// barcolor(BarColor)
+// }
+
+
+group_Exit_1                     = "🟥 🟥 🟥 Exit Setting 🟥 🟥 🟥" //{
+
+// *** SL_Trailing {
+Want__SL_Trailing                = input.bool(true,        'Want__SL_Trailing',                                         group = group_Exit_1) 
+if Want__SL_Trailing
+    if strategy.position_size>0 
+        if high > Buy_TP_1_Price and na(Buy_TP_1_Qty)==false
+            Buy_SL_Price := math.max(Buy_SL_Price, strategy.position_avg_price)
+        if high > Buy_TP_2_Price and na(Buy_TP_2_Qty)==false
+            Buy_SL_Price := math.max(Buy_SL_Price, Buy_TP_1_Price)
+    if strategy.position_size<0 
+        if low  < Sell_TP_1_Price and na(Sell_TP_1_Qty)==false
+            Sell_SL_Price := math.min(Sell_SL_Price, strategy.position_avg_price)
+        if low  < Sell_TP_2_Price and na(Sell_TP_2_Qty)==false
+            Sell_SL_Price := math.min(Sell_SL_Price, Sell_TP_1_Price)
+// }
+
+Want__Target_Type                = input.bool(true,        'Target_Type', inline="Target_Type",                                                       group = group_Exit_1) 
+Target_Type                      = input.string("Risk:Reward Target", '', inline="Target_Type",  options=["Fix_Target_Points", "Risk:Reward Target"], group = group_Exit_1) 
+Target_Points_Min                = input.float(1,  'Target__Min',         inline='Target_Points_Min',         group = group_Exit_1) 
+Target_Points_1                  = input.float(1,  'Target__1',           inline='Target_Points_1',           group = group_Exit_1) 
+Target_Points_2                  = input.float(2,  'Target__2',           inline='Target_Points_2',           group = group_Exit_1) 
+Target_Points_3                  = input.float(3,  'Target__3',           inline='Target_Points_3',           group = group_Exit_1) 
+Target_Qty_1                     = input.float(50,  'Qty %',              inline='Target_Points_1',           group = group_Exit_1) 
+Target_Qty_2                     = input.float(25,  'Qty %',              inline='Target_Points_2',           group = group_Exit_1) 
+Target_Qty_3                     = input.float(25,  'Qty %',              inline='Target_Points_3',           group = group_Exit_1) 
+
+Want_Fix_Target_Points           = Target_Type=='Fix_Target_Points'
+Want_Target_X_Times_SL           = Target_Type=='Risk:Reward Target'
+if not Want__Target_Type
+    Target_Type                 := "Fix_Target_Points"
+    Target_Points_1             := close*100
+    Target_Qty_1                := 100
+
+
+// Fix_Target_Points                = input.float(10,  '',                           inline='Fix_Target_Points',         group = group_Exit_1) 
+// Target_X_Times_SL                = input.float(5,   '',                           inline='Target_X_Times_SL',         group = group_Exit_1) 
+Want_Exit__EMA_1_EMA_2           = input.bool(false,  'EMA_1_X_EMA_2',            inline="Want_Exit__EMA_1_X_EMA_2",  group = group_Exit_1) 
+Want_Exit__EMA_2_EMA_3           = input.bool(false,  'EMA_2_X_SMA_3',            inline="Want_Exit__EMA_2_X_SMA_3",  group = group_Exit_1) 
+Want_Exit__EMA_1_EMA_3           = input.bool(false,  'EMA_1_X_SMA_3',            inline="Want_Exit__EMA_1_X_SMA_3",  group = group_Exit_1) 
+Want_Exit__EMA_1_EMA_2_Confirm   = input.bool(false,      'Breakout',             inline="Want_Exit__EMA_1_X_EMA_2",  group = group_Exit_1) 
+Want_Exit__EMA_2_EMA_3_Confirm   = input.bool(false,      'Breakout',             inline="Want_Exit__EMA_2_X_SMA_3",  group = group_Exit_1) 
+Want_Exit__EMA_1_EMA_3_Confirm   = input.bool(false,      'Breakout',             inline="Want_Exit__EMA_1_X_SMA_3",  group = group_Exit_1) 
+
+Buy_Exit__EMA_1_EMA_2            = Want_Exit__EMA_1_EMA_2 and Want_Exit__EMA_1_EMA_2_Confirm ? ta.crossunder (EMA__Value_1, EMA__Value_2)[1] and close < EMA__Value_1 and close <  low[1] : Want_Exit__EMA_1_EMA_2  ? ta.crossunder (EMA__Value_1, EMA__Value_2)  : false
+Buy_Exit__EMA_2_EMA_3            = Want_Exit__EMA_2_EMA_3 and Want_Exit__EMA_2_EMA_3_Confirm ? ta.crossunder (EMA__Value_2, EMA__Value_3)[1] and close < EMA__Value_2 and close <  low[1] : Want_Exit__EMA_2_EMA_3  ? ta.crossunder (EMA__Value_2, EMA__Value_3)  : false
+Buy_Exit__EMA_1_EMA_3            = Want_Exit__EMA_1_EMA_3 and Want_Exit__EMA_1_EMA_3_Confirm ? ta.crossunder (EMA__Value_1, EMA__Value_3)[1] and close < EMA__Value_1 and close <  low[1] : Want_Exit__EMA_1_EMA_3  ? ta.crossunder (EMA__Value_1, EMA__Value_3)  : false
+Sell_Exit__EMA_1_EMA_2           = Want_Exit__EMA_1_EMA_2 and Want_Exit__EMA_1_EMA_2_Confirm ? ta.crossover  (EMA__Value_1, EMA__Value_2)[1] and close > EMA__Value_1 and close > high[1] : Want_Exit__EMA_1_EMA_2  ? ta.crossover  (EMA__Value_1, EMA__Value_2)  : false
+Sell_Exit__EMA_2_EMA_3           = Want_Exit__EMA_2_EMA_3 and Want_Exit__EMA_2_EMA_3_Confirm ? ta.crossover  (EMA__Value_2, EMA__Value_3)[1] and close > EMA__Value_2 and close > high[1] : Want_Exit__EMA_2_EMA_3  ? ta.crossover  (EMA__Value_2, EMA__Value_3)  : false
+Sell_Exit__EMA_1_EMA_3           = Want_Exit__EMA_1_EMA_3 and Want_Exit__EMA_1_EMA_3_Confirm ? ta.crossover  (EMA__Value_1, EMA__Value_3)[1] and close > EMA__Value_1 and close > high[1] : Want_Exit__EMA_1_EMA_3  ? ta.crossover  (EMA__Value_1, EMA__Value_3)  : false
+
+Want_Exit__EMA_1_Price           = input.bool(false,  'EMA_1_X_Price',            inline="Want_Exit__EMA_1_X_Price",    group = group_Exit_1) 
+Want_Exit__EMA_2_Price           = input.bool(false,  'EMA_2_X_Price',            inline="Want_Exit__EMA_2_X_Price",    group = group_Exit_1) 
+Want_Exit__EMA_3_Price           = input.bool(false,  'SMA_3_X_Price',            inline="Want_Exit__EMA_3_X_Price",    group = group_Exit_1) 
+Want_Exit__EMA_1_Price_Confirm   = input.bool(false,      'Breakout',             inline="Want_Exit__EMA_1_X_Price",    group = group_Exit_1) 
+Want_Exit__EMA_2_Price_Confirm   = input.bool(false,      'Breakout',             inline="Want_Exit__EMA_2_X_Price",    group = group_Exit_1) 
+Want_Exit__EMA_3_Price_Confirm   = input.bool(false,      'Breakout',             inline="Want_Exit__EMA_3_X_Price",    group = group_Exit_1) 
+
+
+Buy_Exit__EMA_1_Price            = Want_Exit__EMA_1_Price and Want_Exit__EMA_1_Price_Confirm ? ta.crossunder (close, EMA__Value_1)[1] and close < EMA__Value_1 and close <  low[1] : Want_Exit__EMA_1_Price  ? ta.crossunder (close, EMA__Value_1)  : false
+Buy_Exit__EMA_2_Price            = Want_Exit__EMA_2_Price and Want_Exit__EMA_2_Price_Confirm ? ta.crossunder (close, EMA__Value_2)[1] and close < EMA__Value_2 and close <  low[1] : Want_Exit__EMA_2_Price  ? ta.crossunder (close, EMA__Value_2)  : false
+Buy_Exit__EMA_3_Price            = Want_Exit__EMA_3_Price and Want_Exit__EMA_3_Price_Confirm ? ta.crossunder (close, EMA__Value_3)[1] and close < EMA__Value_3 and close <  low[1] : Want_Exit__EMA_3_Price  ? ta.crossunder (close, EMA__Value_3)  : false
+Sell_Exit__EMA_1_Price           = Want_Exit__EMA_1_Price and Want_Exit__EMA_1_Price_Confirm ? ta.crossover  (close, EMA__Value_1)[1] and close > EMA__Value_1 and close > high[1] : Want_Exit__EMA_1_Price  ? ta.crossover  (close, EMA__Value_1)  : false
+Sell_Exit__EMA_2_Price           = Want_Exit__EMA_2_Price and Want_Exit__EMA_2_Price_Confirm ? ta.crossover  (close, EMA__Value_2)[1] and close > EMA__Value_2 and close > high[1] : Want_Exit__EMA_2_Price  ? ta.crossover  (close, EMA__Value_2)  : false
+Sell_Exit__EMA_3_Price           = Want_Exit__EMA_3_Price and Want_Exit__EMA_3_Price_Confirm ? ta.crossover  (close, EMA__Value_3)[1] and close > EMA__Value_3 and close > high[1] : Want_Exit__EMA_3_Price  ? ta.crossover  (close, EMA__Value_3)  : false
+
+
+Want_Exit__SPT_1           = input.bool(false,  'SPT_1',                                                 group = group_Exit_1) 
+Want_Exit__AF_1            = input.bool(false,  'AF_1 ',                                                 group = group_Exit_1) 
+Want_Exit__HT_1            = input.bool(false,  'HT_1 ',                                                 group = group_Exit_1) 
+
+Want_Exit__SL_Hit_1        = input.bool(true,   'SL_Hit_1 ',                                             group = group_Exit_1) 
+Want_Exit__Candles         = input.bool(false,  'After_Candles', inline="Want_Exit__After_Candles",      group = group_Exit_1) 
+Exit__After_Candles        = input.int(50,      '',              inline="Want_Exit__After_Candles",      group = group_Exit_1) 
+Want_Exit__Reverse_Trigger = input.bool(false,   'Reverse_Trigger ',                                      group = group_Exit_1) 
+
+
+Buy_Exit__SPT_1            = Want_Exit__SPT_1     ? SPT_1_trend== -1                    : false
+Sell_Exit__SPT_1           = Want_Exit__SPT_1     ? SPT_1_trend==  1                    : false
+Buy_Exit__HT_1             = Want_Exit__HT_1      ? iSell_HT_1                          : false
+Sell_Exit__HT_1            = Want_Exit__HT_1      ? iBuy_HT_1                           : false
+Buy_Exit__AF_1             = Want_Exit__AF_1      ? iSell_Avg_Force_1                   : false
+Sell_Exit__AF_1            = Want_Exit__AF_1      ? iBuy_Avg_Force_1                    : false
+Buy_Exit__SL_Hit_1         = Want_Exit__SL_Hit_1  ? close <= Buy_SL_Price               : false
+Sell_Exit__SL_Hit_1        = Want_Exit__SL_Hit_1  ? close >= Sell_SL_Price              : false
+Buy_Exit__Candles          = Want_Exit__Candles   ? Exit__After_Candles <= Buy_Counter__After  : false
+Sell_Exit__Candles         = Want_Exit__Candles   ? Exit__After_Candles <= Sell_Counter__After : false
+Buy_Exit__Reverse_Trigger  = Want_Exit__Reverse_Trigger   ? Sell_Time__Trigger          : false
+Sell_Exit__Reverse_Trigger = Want_Exit__Reverse_Trigger   ? Buy_Time__Trigger           : false
+
+
+Buy_Exit                 = strategy.position_size>0
+                         and (  Buy_Exit__EMA_1_EMA_2
+                             or Buy_Exit__EMA_2_EMA_3
+                             or Buy_Exit__EMA_1_EMA_3
+                             or Buy_Exit__EMA_1_Price
+                             or Buy_Exit__EMA_2_Price
+                             or Buy_Exit__EMA_3_Price
+                             or Buy_Exit__SPT_1     
+                             or Buy_Exit__HT_1      
+                             or Buy_Exit__AF_1      
+                             or Buy_Exit__SL_Hit_1  
+                             or Buy_Exit__Candles   
+                             or Time_Exit()   
+                             or Buy_Exit__Reverse_Trigger  
+                             )
+Sell_Exit                = strategy.position_size<0
+                         and (  Sell_Exit__EMA_1_EMA_2
+                             or Sell_Exit__EMA_2_EMA_3
+                             or Sell_Exit__EMA_1_EMA_3
+                             or Sell_Exit__EMA_1_Price
+                             or Sell_Exit__EMA_2_Price
+                             or Sell_Exit__EMA_3_Price
+                             or Sell_Exit__SPT_1     
+                             or Sell_Exit__HT_1      
+                             or Sell_Exit__AF_1      
+                             or Sell_Exit__SL_Hit_1  
+                             or Sell_Exit__Candles   
+                             or Time_Exit()   
+                             or Sell_Exit__Reverse_Trigger 
+                             )
+
+Buy_Exit_Text                 = ""
+if Buy_Exit                 
+    switch 
+        Buy_Exit__EMA_1_EMA_2     =>  Buy_Exit_Text   := "EMA_1_X_EMA_2   "
+        Buy_Exit__EMA_2_EMA_3     =>  Buy_Exit_Text   := "EMA_2_X_EMA_3   "
+        Buy_Exit__EMA_1_EMA_3     =>  Buy_Exit_Text   := "EMA_1_X_EMA_3   "
+        Buy_Exit__EMA_1_Price     =>  Buy_Exit_Text   := "EMA_1_X_Price   "
+        Buy_Exit__EMA_2_Price     =>  Buy_Exit_Text   := "EMA_2_X_Price   "
+        Buy_Exit__EMA_3_Price     =>  Buy_Exit_Text   := "EMA_3_X_Price   "
+        Buy_Exit__SPT_1           =>  Buy_Exit_Text   := "SPT_1           "
+        Buy_Exit__HT_1            =>  Buy_Exit_Text   := "HT_1            "
+        Buy_Exit__AF_1            =>  Buy_Exit_Text   := "AF_1            "
+        Buy_Exit__SL_Hit_1        =>  Buy_Exit_Text   := "SL_Hit_1        "
+        Buy_Exit__Candles         =>  Buy_Exit_Text   := "Time_Candles    "
+        Time_Exit()               =>  Buy_Exit_Text   := "End of Day      "
+        Buy_Exit__Reverse_Trigger =>  Buy_Exit_Text   := "Reverse Trigger "
+Sell_Exit_Text                 = ""
+if Sell_Exit                 
+    switch 
+        Sell_Exit__EMA_1_EMA_2     =>  Sell_Exit_Text  := "EMA_1_X_EMA_2   "
+        Sell_Exit__EMA_2_EMA_3     =>  Sell_Exit_Text  := "EMA_2_X_EMA_3   "
+        Sell_Exit__EMA_1_EMA_3     =>  Sell_Exit_Text  := "EMA_1_X_EMA_3   "
+        Sell_Exit__EMA_1_Price     =>  Sell_Exit_Text  := "EMA_1_X_Price   "
+        Sell_Exit__EMA_2_Price     =>  Sell_Exit_Text  := "EMA_2_X_Price   "
+        Sell_Exit__EMA_3_Price     =>  Sell_Exit_Text  := "EMA_3_X_Price   "
+        Sell_Exit__SPT_1           =>  Sell_Exit_Text  := "SPT_1           "
+        Sell_Exit__HT_1            =>  Sell_Exit_Text  := "HT_1            "
+        Sell_Exit__AF_1            =>  Sell_Exit_Text  := "AF_1            "
+        Sell_Exit__SL_Hit_1        =>  Sell_Exit_Text  := "SL_Hit_1        "
+        Sell_Exit__Candles         =>  Sell_Exit_Text  := "Time_Candles    "
+        Time_Exit()                =>  Sell_Exit_Text  := "End of Day      "
+        Sell_Exit__Reverse_Trigger =>  Sell_Exit_Text  := "Reverse Trigger "
+
+
+// }
+
+// ************* Conditions  { 
+
+if Buy_Time__Trigger   
+    Buy_Trigger_Type    := Buy_Time_A   ? "A" : Buy_Time_B  ? "B" : Buy_Time_C  ? "C" : "D"
+    Buy_Counter         := na
+    Buy_EP_Strike       := Strike_Price
+    Buy_Trigger_Counter := 0
+    Buy_Counter__After  := 0
+    Buy_Qty             := iBuy_Qty
+    Buy_EP_Price        := iBuy_EP_Price   + Entry_Buffer_Points
+    Buy_SL_Price        := iBuy_SL_Price
+    SL_Points            = Target_Type=='Fix_Target_Points' ? 1 : (math.abs(Buy_EP_Price - Buy_SL_Price) - Entry_Buffer_Points)
+    Buy_TP_1_Price      := Buy_EP_Price + math.max(Target_Points_1*SL_Points, Target_Points_Min)
+    Buy_TP_2_Price      := Buy_EP_Price + math.max(Target_Points_2*SL_Points, Target_Points_Min)
+    Buy_TP_3_Price      := Buy_EP_Price + math.max(Target_Points_3*SL_Points, Target_Points_Min)
+    Order_Lots           = iBuy_Qty/Lot_Size
+    Buy_TP_1_Qty        := math.round( Order_Lots*0.01*Target_Qty_1 ) *Lot_Size
+    if Buy_TP_1_Qty < Buy_Qty
+        Buy_TP_2_Qty    := math.round( Order_Lots*0.01*Target_Qty_2 ) *Lot_Size
+        if (Buy_TP_1_Qty + Buy_TP_2_Qty) < Buy_Qty
+            Buy_TP_3_Qty:= Buy_Qty - (Buy_TP_1_Qty + Buy_TP_2_Qty)
+        else
+            Buy_TP_3_Qty        := na
+    else
+        Buy_TP_2_Qty        := na
+        Buy_TP_3_Qty        := na
+        
+
+
+if Sell_Time__Trigger  
+    Sell_Trigger_Type   := Sell_Time_A   ? "A" : Sell_Time_B  ? "B" : Sell_Time_C  ? "C" : "D"
+    Sell_Counter        := na
+    Sell_Trigger_Counter:= 0
+    Sell_Counter__After := 0
+    Sell_EP_Strike      := Strike_Price
+    Sell_Qty            := iSell_Qty
+    Sell_EP_Price       := iSell_EP_Price   - Entry_Buffer_Points
+    Sell_SL_Price       := iSell_SL_Price
+    SL_Points            = Target_Type=='Fix_Target_Points' ? 1 : (math.abs(Sell_EP_Price - Sell_SL_Price) - Entry_Buffer_Points)
+    Sell_TP_1_Price     := Sell_EP_Price - math.max(Target_Points_1*SL_Points, Target_Points_Min)
+    Sell_TP_2_Price     := Sell_EP_Price - math.max(Target_Points_2*SL_Points, Target_Points_Min)
+    Sell_TP_3_Price     := Sell_EP_Price - math.max(Target_Points_3*SL_Points, Target_Points_Min)
+    Order_Lots           = iSell_Qty/Lot_Size
+    Sell_TP_1_Qty        := math.round( Order_Lots*0.01*Target_Qty_1 ) *Lot_Size
+    if Sell_TP_1_Qty < Sell_Qty
+        Sell_TP_2_Qty    := math.round( Order_Lots*0.01*Target_Qty_2 ) *Lot_Size
+        if (Sell_TP_1_Qty + Sell_TP_2_Qty) < Sell_Qty
+            Sell_TP_3_Qty:= Sell_Qty - (Sell_TP_1_Qty + Sell_TP_2_Qty)
+        else
+            Sell_TP_3_Qty        := na
+    else
+        Sell_TP_2_Qty        := na
+        Sell_TP_3_Qty        := na
+
+
+if Buy_Time__Trigger  
+    Sell_Trigger_Counter := na
+if Sell_Time__Trigger  
+    Buy_Trigger_Counter  := na
+
+
+
+
+Buy_Entry_Buffer_Candles  =  Buy_Trigger_Type=="D" ? 2 : Entry_Buffer_Candles 
+Sell_Entry_Buffer_Candles = Sell_Trigger_Type=="D" ? 2 : Entry_Buffer_Candles 
+
+Buy_Time__Close   = (Buy_Trigger_Counter <= Buy_Entry_Buffer_Candles   )
+             and  strategy.position_size>=0 
+             and  close > Buy_EP_Price 
+             and  Time_Entry() and Time_Exit()==false  
+             and  Buy_Qty > 0 
+             and  Entry_Type_Touch==false
+
+Sell_Time__Close  = (Sell_Trigger_Counter <= Sell_Entry_Buffer_Candles   )
+             and  strategy.position_size<=0 
+             and  close < Sell_EP_Price 
+             and  Time_Entry() and Time_Exit()==false  
+             and  Sell_Qty > 0 
+             and  Entry_Type_Touch==false
+
+Buy_Time__Touch   = (Buy_Trigger_Counter <= Buy_Entry_Buffer_Candles   )
+             and  strategy.position_size>=0 
+             and  high >= Buy_EP_Price 
+             and  Time_Entry() and Time_Exit()==false  
+             and  Buy_Qty > 0 
+             and  Entry_Type_Touch
+
+Sell_Time__Touch  = (Sell_Trigger_Counter <= Sell_Entry_Buffer_Candles   )
+             and  strategy.position_size<=0 
+             and  low  <= Sell_EP_Price 
+             and  Time_Entry() and Time_Exit()==false  
+             and  Sell_Qty > 0 
+             and  Entry_Type_Touch
+
+
+Buy_Time__Entry  =   Buy_Time__Close or   Buy_Time__Touch
+Sell_Time__Entry =  Sell_Time__Close or  Sell_Time__Touch
+
+
+
+Buy_Time   = ( Entry_Type_Touch ? (Buy_Trigger_Counter  < Buy_Entry_Buffer_Candles)   : (Buy_Trigger_Counter  <= Buy_Entry_Buffer_Candles)    )
+             and  strategy.position_size<=0
+             and  (Entry_Type_Touch ? close < Buy_EP_Price : close > Buy_EP_Price)
+             and  Time_Entry() and Time_Exit()==false  
+             and  Buy_Qty > 0 
+
+Sell_Time  = ( Entry_Type_Touch ? (Sell_Trigger_Counter < Sell_Entry_Buffer_Candles)  : (Sell_Trigger_Counter <= Sell_Entry_Buffer_Candles)   )
+             and  strategy.position_size>=0
+             and  (Entry_Type_Touch ? close > Sell_EP_Price : close < Sell_EP_Price)
+             and  Time_Entry() and Time_Exit()==false  
+             and  Sell_Qty > 0 
+
+
+if Buy_Time__Entry  or strategy.position_size>0 or (Entry_Type_Touch and Buy_Time  ==false)
+    Buy_Trigger_Counter  := na
+if Sell_Time__Entry or strategy.position_size<0 or (Entry_Type_Touch and Sell_Time ==false)
+    Sell_Trigger_Counter := na
+
+
+if Buy_Time   
+    Buy_Counter         := 0
+if Sell_Time  
+    Sell_Counter        := 0
+
+Buy_Cancel  =  Buy_Time==false  or na(Buy_Trigger_Counter  )
+Sell_Cancel = Sell_Time==false  or na(Sell_Trigger_Counter )
+
+BarColor = Buy_Time__Trigger or Sell_Time__Trigger ? Trigger_Candle_Color :  Buy_Time__Entry  or Sell_Time__Entry ? Entry_Candle_Color : na
+barcolor(BarColor)
+
+Buy_BarColor  = Buy_Time__Trigger   ? Trigger_Candle_Color : Buy_Time__Entry  ? Entry_Candle_Color : na
+Sell_BarColor = Sell_Time__Trigger  ? Trigger_Candle_Color : Sell_Time__Entry ? Entry_Candle_Color : na
+
+plotshape( not na(Buy_BarColor  ), "Buy_BarColor  ", shape.circle, location.bottom,  Buy_BarColor  )
+plotshape( not na(Sell_BarColor ), "Sell_BarColor ", shape.circle, location.top,     Sell_BarColor )
+
+// }
+
+// ************** Entries {
+if Buy_Exit
+    strategy.close(id = "Buy", 
+                                 comment        = Algo_Buy_Exit_Syntax  ('Buy_'+Buy_Exit_Text,     close, Qty=100), 
+                                 alert_message  = Algo_Buy_Exit_Syntax  ('OFF',                    close, Qty=100) )
+if Sell_Exit
+    strategy.close(id = "Sell",
+                                 comment        = Algo_Sell_Exit_Syntax ('Sell_'+Sell_Exit_Text,   close, Qty=100), 
+                                 alert_message  = Algo_Sell_Exit_Syntax ('OFF',                    close, Qty=100) )
+
+
+if Buy_Time
+    strategy.entry(id = "Buy",   direction = strategy.long,  qty=Buy_Qty,  stop = Entry_Type_Touch ? Buy_EP_Price : na,
+                             comment=Algo_Buy_Entry_Syntax ('Buy_Entry',   Buy_EP_Strike,  Qty=Buy_Qty,  Reverse = strategy.position_size < 0, RISK_VALUE = Risk_Value ),  
+                             alert_message=Algo_Buy_Entry_Syntax ('OFF',   Buy_EP_Strike,  Qty=Buy_Qty,  Reverse = strategy.position_size < 0, RISK_VALUE = Risk_Value ) )
+if Sell_Time
+    strategy.entry(id = "Sell" , direction = strategy.short, qty=Sell_Qty, stop = Entry_Type_Touch ? Sell_EP_Price : na,
+                             comment=Algo_Sell_Entry_Syntax('Sell_Entry',  Sell_EP_Strike, Qty=Sell_Qty, Reverse = strategy.position_size > 0, RISK_VALUE = Risk_Value ), 
+                             alert_message=Algo_Sell_Entry_Syntax('OFF',   Sell_EP_Strike, Qty=Sell_Qty, Reverse = strategy.position_size > 0, RISK_VALUE = Risk_Value ) )
+
+// *********** Exits {
+        
+
+if not na(Buy_TP_1_Price)
+    strategy.exit("Buy_Exit_1", "Buy", limit = Buy_TP_1_Price, qty=Buy_TP_1_Qty, 
+                         comment        = Algo_Buy_Exit_Syntax   ('Buy_TP_1_Hit',  close, Qty=Target_Qty_1  ), 
+                         alert_message  = Algo_Buy_Exit_Syntax   ('OFF',           close, Qty=Target_Qty_1  ) )
+if not na(Sell_TP_1_Price)
+    strategy.exit("Sell_Exit_1", "Sell", limit = Sell_TP_1_Price, qty=Sell_TP_1_Qty, 
+                         comment        = Algo_Sell_Exit_Syntax  ('Sell_TP_1_Hit', close, Qty=Target_Qty_1 ), 
+                         alert_message  = Algo_Sell_Exit_Syntax  ('OFF',           close, Qty=Target_Qty_1 ) )
+if not na(Buy_TP_2_Price)
+    strategy.exit("Buy_Exit_2", "Buy", limit = Buy_TP_2_Price, qty=Buy_TP_2_Qty, 
+                         comment        = Algo_Buy_Exit_Syntax   ('Buy_TP_2_Hit',  close, Qty=Target_Qty_2, Delay=1  ), 
+                         alert_message  = Algo_Buy_Exit_Syntax   ('OFF',           close, Qty=Target_Qty_2, Delay=1  ) )
+if not na(Sell_TP_2_Price)
+    strategy.exit("Sell_Exit_2", "Sell", limit = Sell_TP_2_Price, qty=Sell_TP_2_Qty, 
+                         comment        = Algo_Sell_Exit_Syntax  ('Sell_TP_2_Hit', close, Qty=Target_Qty_2, Delay=1 ), 
+                         alert_message  = Algo_Sell_Exit_Syntax  ('OFF',           close, Qty=Target_Qty_2, Delay=1 ) )
+if not na(Buy_TP_3_Price)
+    strategy.exit("Buy_Exit_3", "Buy", limit = Buy_TP_3_Price, qty=Buy_TP_3_Qty, 
+                         comment        = Algo_Buy_Exit_Syntax   ('Buy_TP_3_Hit',  close, Qty=100, Delay=3 ), 
+                         alert_message  = Algo_Buy_Exit_Syntax   ('OFF',           close, Qty=100, Delay=3 ) )
+if not na(Sell_TP_3_Price)
+    strategy.exit("Sell_Exit_3", "Sell", limit = Sell_TP_3_Price, qty=Sell_TP_3_Qty, 
+                         comment        = Algo_Sell_Exit_Syntax  ('Sell_TP_3_Hit', close, Qty=100, Delay=3 ), 
+                         alert_message  = Algo_Sell_Exit_Syntax  ('OFF',           close, Qty=100, Delay=3 ) )
+// }
+
+if Buy_Cancel   
+    strategy.cancel( "Buy")
+if Sell_Cancel  
+    strategy.cancel( "Sell")
+
+// }
+
+
+// **** Conditional Exceptions {
+
+Buy_Time_A__Exception    = (Buy_Trigger_Counter  == Entry_Buffer_Candles or na(Buy_Trigger_Counter  ) ) and Final_Trend_A > 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size<0 and Condition_Type_A
+Sell_Time_A__Exception   = (Sell_Trigger_Counter == Entry_Buffer_Candles or na(Sell_Trigger_Counter ) ) and Final_Trend_A < 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size>0 and Condition_Type_A
+if Buy_Time_A__Exception    
+    Final_Trend_A :=  -1
+if Sell_Time_A__Exception   
+    Final_Trend_A :=   1
+Buy_Time_B__Exception    = (Buy_Trigger_Counter  == Entry_Buffer_Candles or na(Buy_Trigger_Counter  ) ) and Final_Trend_B > 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size<0 and Condition_Type_B
+Sell_Time_B__Exception   = (Sell_Trigger_Counter == Entry_Buffer_Candles or na(Sell_Trigger_Counter ) ) and Final_Trend_B < 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size>0 and Condition_Type_B
+if Buy_Time_B__Exception    
+    Final_Trend_B :=  -1
+if Sell_Time_B__Exception   
+    Final_Trend_B :=   1
+Buy_Time_C__Exception    = (Buy_Trigger_Counter  == Entry_Buffer_Candles or na(Buy_Trigger_Counter  ) ) and Final_Trend_C > 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size<0 and Condition_Type_C
+Sell_Time_C__Exception   = (Sell_Trigger_Counter == Entry_Buffer_Candles or na(Sell_Trigger_Counter ) ) and Final_Trend_C < 0 and Time_Entry() and Time_Exit()==false  and strategy.position_size>0 and Condition_Type_C
+if Buy_Time_C__Exception    
+    Final_Trend_C :=  -1
+if Sell_Time_C__Exception   
+    Final_Trend_C :=   1
+// plotshape(Final_Trend_B, "Final_Trend_B", shape.circle, location.top, color.black)    
+// plotshape(Buy_Trigger_Counter,      "Buy_Trigger_Counter", shape.circle, location.top, color.black)    
+// plotshape(Sell_Trigger_Counter,     "Sell_Trigger_Counter", shape.circle, location.top, color.black)    
+// }
+
+// **************** Main Calculations         } ******************
+
+
+
+
+// ********** Display { ************
+Display_TP_SL = input.bool(true,    "Display TP/SL on Chart", group = "🟥 🟥 🟥 Display 🟥 🟥 🟥 ")
+Plot_TP_1 = Want__Target_Type ? (strategy.position_size > 0 ?  Buy_TP_1_Price : strategy.position_size < 0 ?  Sell_TP_1_Price : na  ): na
+Plot_TP_2 = Want__Target_Type ? (strategy.position_size > 0 ?  Buy_TP_2_Price : strategy.position_size < 0 ?  Sell_TP_2_Price : na  ): na
+Plot_TP_3 = Want__Target_Type ? (strategy.position_size > 0 ?  Buy_TP_3_Price : strategy.position_size < 0 ?  Sell_TP_3_Price : na  ): na
+Plot_SL   = strategy.position_size > 0 ?  Buy_SL_Price   : strategy.position_size < 0 ?  Sell_SL_Price   : na 
+
+
+Pp0 = plot( Display_TP_SL ? strategy.position_avg_price : na, title = "Entry_Price ",  style = plot.style_linebr, color=color.gray )
+Pp1 = plot( Display_TP_SL ? Plot_TP_1                   : na, title = "Target_1",      style = plot.style_linebr, color=color.green)
+Pp2 = plot( Display_TP_SL ? Plot_TP_2                   : na, title = "Target_2",      style = plot.style_linebr, color=color.green)
+Pp3 = plot( Display_TP_SL ? Plot_TP_3                   : na, title = "Target_3",      style = plot.style_linebr, color=color.green)
+Pp4 = plot( Display_TP_SL ? Plot_SL                     : na, title = "Stop_Loss",     style = plot.style_linebr, color=color.red  )
+
+fill(Pp0, Pp1, color = color.new(color.green,93), title= "Targets_1" )
+fill(Pp0, Pp2, color = color.new(color.green,93), title= "Targets_2" )
+fill(Pp0, Pp3, color = color.new(color.green,93), title= "Targets_3" )
+fill(Pp0, Pp4, color = color.new(color.red,  85), title= "Stop_Loss" )
+    
+
+// ********** Display } ************
+
+
+

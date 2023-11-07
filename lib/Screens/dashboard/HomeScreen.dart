@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
         SizedBox(
           height: 20,
         ),
-        StockList(),
+        SingleChildScrollView(child: StockList()),
       ],
     );
   }

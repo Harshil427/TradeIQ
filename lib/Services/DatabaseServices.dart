@@ -108,7 +108,7 @@ class DatabaseServices {
     }
     return res;
   }
-  
+
   // Add favorite stock in database
   Future<String> saveDataToFirestore(
       String stockName, String description) async {
@@ -127,6 +127,52 @@ class DatabaseServices {
       // Handle errors here, such as displaying an error message to the user.
       print('Error saving data: $error');
     });
+    return res;
+  }
+
+  //bug store code
+  Future<String> addBugReport(String bugDescription) async {
+    String res = 'Error...';
+    try {
+      await FirebaseFirestore.instance
+          .collection('admin')
+          .doc('bugs')
+          .collection(AuthServices().getUid())
+          .add({
+        'data': bugDescription,
+        'timestamp':
+            FieldValue.serverTimestamp(), // You can add a timestamp if needed
+      });
+      res = 'Success';
+      print('Bug report added to Firestore');
+    } catch (e) {
+      print('Error adding bug report to Firestore: $e');
+    }
+    return res;
+  }
+
+  //Support request
+  Future<String> addSupportRequest(
+    String name,
+    String email,
+    String message,
+  ) async {
+    String res = 'Error..';
+    try {
+      await FirebaseFirestore.instance
+          .collection('admin')
+          .doc('support')
+          .collection(AuthServices().getUid())
+          .add({
+        'Name': name,
+        'Email': email,
+        'Message': message,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      res = 'Success';
+    } catch (e) {
+      print('Error adding support request to Firestore: $e');
+    }
     return res;
   }
 }

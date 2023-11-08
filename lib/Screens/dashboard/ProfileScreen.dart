@@ -5,11 +5,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tradeiq/Components/market_status.dart';
 import 'package:tradeiq/Constants/Colors.dart';
 import 'package:tradeiq/Module/User.dart';
+import 'package:tradeiq/Screens/Pages/HelpCenterPage.dart';
+import 'package:tradeiq/Screens/Pages/ReportBug.dart';
+import 'package:tradeiq/Screens/Pages/SupportPage.dart';
 import 'package:tradeiq/Screens/Tools/Edit_ProfileScreen.dart';
 import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Services/DatabaseServices.dart';
 import 'package:tradeiq/Utils/Functions.dart';
 
+import '../Pages/BrokerList.dart';
 import '../Pages/EconomicCalendar.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -226,15 +230,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           buildListTileWithImage(
               'Assets/Images/icons/analysis.png', 'Analysis', () {}),
           buildListTileWithImage(
-              'Assets/Images/icons/broker.png', 'Best Broker', () {}),
+            'Assets/Images/icons/broker.png',
+            'Best Broker',
+            () {
+              moveNextPage(
+                context,
+                BestBrokerPage(),
+              );
+            },
+          ),
           GestureDetector(
             onTap: () {
               moveNextPage(context, MarketStatusWidget());
             },
             child: buildListTileWithImage(
-                'Assets/Images/icons/institution.png', 'Market Status', () {
-              moveNextPage(context, MarketStatusWidget());
-            }),
+              'Assets/Images/icons/institution.png',
+              'Market Status',
+              () {
+                moveNextPage(
+                  context,
+                  MarketStatusWidget(),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -250,12 +268,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           SizedBox(height: height * .01),
           buildSectionTitle('Support'),
-          buildListTileWithImage(
-              'Assets/Images/icons/help.png', 'Help Center', () {}),
-          buildListTileWithImage(
-              'Assets/Images/icons/service.png', 'Support', () {}),
-          buildListTileWithImage(
-              'Assets/Images/icons/bug.png', 'Report Bug', () {}),
+          buildListTileWithImage('Assets/Images/icons/help.png', 'Help Center',
+              () {
+            moveNextPage(
+              context,
+              HelpCenterPage(),
+            );
+          }),
+          buildListTileWithImage('Assets/Images/icons/service.png', 'Support',
+              () {
+            moveNextPage(
+              context,
+              SupportPage(),
+            );
+          }),
+          GestureDetector(
+            onTap: () {
+              moveNextPage(context, BugReportPage());
+            },
+            child: buildListTileWithImage(
+                'Assets/Images/icons/bug.png', 'Report Bug', () {
+              moveNextPage(context, BugReportPage());
+            }),
+          ),
         ],
       ),
     );

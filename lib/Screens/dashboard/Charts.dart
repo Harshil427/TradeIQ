@@ -121,7 +121,9 @@ class _ChartsScreenState extends State<ChartsScreen> {
         topGainers.isEmpty && topLosers.isEmpty
             ? Center(child: CircularProgressIndicator())
             : TopLosersGainersPage(
-                topGainers: topGainers, topLosers: topLosers),
+                topGainers: topGainers,
+                topLosers: topLosers,
+              ),
       ],
     );
   }

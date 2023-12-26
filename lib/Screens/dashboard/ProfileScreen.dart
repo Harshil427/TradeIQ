@@ -13,6 +13,7 @@ import 'package:tradeiq/Services/Auth_Services.dart';
 import 'package:tradeiq/Services/DatabaseServices.dart';
 import 'package:tradeiq/Utils/Functions.dart';
 
+import '../Community/Category.dart';
 import '../Pages/BrokerList.dart';
 import '../Pages/EconomicCalendar.dart';
 
@@ -126,12 +127,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           buildListTile(
               Icons.align_horizontal_left_rounded, 'Predictions', () {}),
           buildListTile(Icons.push_pin, 'Saved elements', () {}),
-          buildListTile(Icons.monetization_on_rounded, 'Portfolio', () {}),
+          buildListTile(
+            Icons.monetization_on_rounded,
+            'Community',
+            () {
+              moveNextPage(
+                context,
+                CategoryTabView(),
+              );
+            },
+          ),
           buildListTile(
             Icons.calendar_month_outlined,
             "Economic Calendar",
             () {
-              moveNextPage(context, EconomicCalendarPage());
+              moveNextPage(
+                context,
+                EconomicCalendarPage(),
+              );
             },
           )
         ],
@@ -226,9 +239,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SizedBox(height: height * .01),
           buildSectionTitle('Tools'),
           buildListTileWithImage(
-              'Assets/Images/icons/profit.png', 'Select Stocks', () {}),
+            'Assets/Images/icons/profit.png',
+            'Select Stocks',
+            () {
+              //
+            },
+          ),
           buildListTileWithImage(
-              'Assets/Images/icons/analysis.png', 'Analysis', () {}),
+            'Assets/Images/icons/analysis.png',
+            'Analysis',
+            () {
+              //
+            },
+          ),
           buildListTileWithImage(
             'Assets/Images/icons/broker.png',
             'Best Broker',

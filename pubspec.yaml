@@ -59,6 +59,7 @@ dependencies:
   url_launcher: ^6.1.14
   quick_actions: ^1.0.6
   firebase_messaging: ^14.6.8
+  firebase_database: ^10.3.4
 
 dev_dependencies:
   flutter_test:

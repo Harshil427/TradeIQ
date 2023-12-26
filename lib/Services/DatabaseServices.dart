@@ -20,7 +20,8 @@ class DatabaseServices {
             name: name,
             email: email,
             favorites: [],
-            alerts: [],
+            alerts: [], 
+            followedClubs: [],
           ).toMap(),
         );
   }

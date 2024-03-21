@@ -159,12 +159,27 @@ class _SignalDetailsPageState extends State<SignalDetailsPage> {
       child: Column(
         children: [
           SizedBox(height: 20),
-          _buildSignalInfoRow('Entry Price:',
-              widget.stockEntry['stockentryController'].toString()),
           _buildSignalInfoRow(
-              'Top Profit:', widget.stockEntry['takeProfit'].toString()),
+            'Entry Price:',
+            widget.stockEntry['stockentryController'].toString(),
+          ),
+          SizedBox(
+            height: 5,
+          ),
           _buildSignalInfoRow(
-              'Stop Loss:', widget.stockEntry['stopLoss'].toString()),
+            'Top Profit:',
+            widget.stockEntry['takeProfit'].toString(),
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          _buildSignalInfoRow(
+            'Stop Loss:',
+            widget.stockEntry['stopLoss'].toString(),
+          ),
+          SizedBox(
+            height: 5,
+          ),
         ],
       ),
     );
@@ -177,7 +192,7 @@ class _SignalDetailsPageState extends State<SignalDetailsPage> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 22,
             color: Colors.black,
           ),
         ),
@@ -185,7 +200,7 @@ class _SignalDetailsPageState extends State<SignalDetailsPage> {
         Text(
           value,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 20,
             color: Colors.black,
           ),
         ),

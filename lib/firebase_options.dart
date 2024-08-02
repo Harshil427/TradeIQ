@@ -44,8 +44,8 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDiC2kOW_nt9XJcqoOSoHHPQKl2VdiSmaw',
-    appId: '1:124622173320:web:52893d9b44ed19ae295b3d',
+    apiKey: '########################################',
+    appId: '########################################',
     messagingSenderId: '124622173320',
     projectId: 'tradeiq-3a498',
     authDomain: 'tradeiq-3a498.firebaseapp.com',
@@ -54,16 +54,16 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBkjJkr8hue33IpyATAH_I3rAWwTsWssk0',
-    appId: '1:124622173320:android:ee63402ca77c5241295b3d',
+    apiKey: '########################################',
+    appId: '########################################',
     messagingSenderId: '124622173320',
     projectId: 'tradeiq-3a498',
     storageBucket: 'tradeiq-3a498.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBkTM2uCwB98ZEHFKWpvhrrTgQsPmmQ5gY',
-    appId: '1:124622173320:ios:59798e6c85b684cb295b3d',
+    apiKey: '########################################',
+    appId: '########################################',
     messagingSenderId: '124622173320',
     projectId: 'tradeiq-3a498',
     storageBucket: 'tradeiq-3a498.appspot.com',
@@ -72,8 +72,8 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBkTM2uCwB98ZEHFKWpvhrrTgQsPmmQ5gY',
-    appId: '1:124622173320:ios:1d1cf092abb0bc3c295b3d',
+    apiKey: '########################################',
+    appId: '########################################',
     messagingSenderId: '124622173320',
     projectId: 'tradeiq-3a498',
     storageBucket: 'tradeiq-3a498.appspot.com',

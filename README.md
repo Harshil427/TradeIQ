@@ -21,6 +21,9 @@ TradeIQ Stock App is a comprehensive stock market trading platform designed to p
 - Predictive Analytics: TradingView Pine Script
 - APIs: Finnhub, Alpha Vantage
 
+# ScreenShot
+
+
 # System Architecture
 ```
 git clone https://github.com/your-username/tradeiq-stock-app.git

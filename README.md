@@ -27,7 +27,7 @@ TradeIQ Stock App is a comprehensive stock market trading platform designed to p
 <img src="ScreenShot/Img3.jpg" alt="TradeIQ Stock App" width="200"> <img src="ScreenShot/Img4.jpg" alt="TradeIQ Stock App" width="200">
 <img src="ScreenShot/Img5.jpg" alt="TradeIQ Stock App" width="200"> <img src="ScreenShot/Img5.jpg" alt="TradeIQ Stock App" width="200">
 <img src="ScreenShot/Img6.png" alt="TradeIQ Stock App" width="200"> <img src="ScreenShot/Img7.jpg" alt="TradeIQ Stock App" width="200"> 
-<img src="ScreenShot/Img7.jpg" alt="TradeIQ Stock App" width="200"> <img src="ScreenShot/Img7.jpg" alt="TradeIQ Stock App" width="200"> 
+<img src="ScreenShot/Img7.jpg" alt="TradeIQ Stock App" width="200"> 
 <img src="ScreenShot/Img8.jpg" alt="TradeIQ Stock App" width="200"> <img src="ScreenShot/Img9.jpg" alt="TradeIQ Stock App" width="200"> 
 <img src="ScreenShot/Img10.png" alt="TradeIQ Stock App" width="200"> <img src="ScreenShot/Img11.jpg" alt="TradeIQ Stock App" width="200"> 
 

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors, file_names
+// ignore_for_file: prefer_const_constructors, file_names, use_key_in_widget_constructors
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +14,7 @@ class WatchlistWidget extends StatelessWidget {
           .collection('users')
           .doc(
             AuthServices().getUid(),
-          ) 
+          )
           .collection('favrites')
           .snapshots(),
       builder: (context, snapshot) {
@@ -34,30 +34,36 @@ class WatchlistWidget extends StatelessWidget {
 
         return Padding(
           padding: const EdgeInsets.all(14.0),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: favorites.length,
-            itemBuilder: (context, index) {
-              final favorite = favorites[index].data() as Map<String, dynamic>;
-              final stockName = favorite['name'] ?? '';
-              final description = favorite['description'] ?? '';
+          child: SingleChildScrollView( // Wrap with SingleChildScrollView
+            child: Column(
+              children: [
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: favorites.length,
+                  itemBuilder: (context, index) {
+                    final favorite = favorites[index].data() as Map<String, dynamic>;
+                    final stockName = favorite['name'] ?? '';
+                    final description = favorite['description'] ?? '';
 
-              return WatchListCard(
-                description: description,
-                name: stockName,
-                onRemove: () {
-                  // Remove the stock from the user's favorites
-                  FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(
-                        AuthServices().getUid(),
-                      )
-                      .collection('favrites')
-                      .doc(favorites[index].id)
-                      .delete();
-                },
-              );
-            },
+                    return WatchListCard(
+                      description: description,
+                      name: stockName,
+                      onRemove: () {
+                        // Remove the stock from the user's favorites
+                        FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(
+                              AuthServices().getUid(),
+                            )
+                            .collection('favrites')
+                            .doc(favorites[index].id)
+                            .delete();
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },

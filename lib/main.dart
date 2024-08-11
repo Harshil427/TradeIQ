@@ -34,7 +34,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final quickActions = QuickActions();
 
-
   // Show the quick actions when the app is opened 
   @override
   void initState() {

@@ -9,6 +9,12 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tradeiq/Screens/Auth/Login_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+addTextFilterForStock(String s){
+  return s.replaceAllMapped(RegExp(r'[^0-9\.]'), (match) {
+    return match.group(0) == '.' ? '.' : '';
+  });
+}
+
 Widget onboardingScreenBottom(
     PageController pageController, bool onLast, double height, int pageCount) {
   return Row(
@@ -105,3 +111,8 @@ launchURL(String u) async {
       print('Could not launch $url');
     }
   }
+
+filterUrlBaseOnText(String s) async{
+  String url = 'https://www.google.com/search?q=$s';
+  return url;
+}

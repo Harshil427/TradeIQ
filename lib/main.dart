@@ -47,7 +47,7 @@ class _MyAppState extends State<MyApp> {
     quickActions.initialize((type) {
       if (type == 'Search') {
         moveNextPage(context, SearchStockScreen());
-      } else if (type == 'Calendar') {
+      } else if (type == 'Calenders') {
         moveNextPage(context, EconomicCalendarPage());
       } else if (type == 'Status') {
         moveNextPage(context, MarketStatusWidget());

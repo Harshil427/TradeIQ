@@ -13,6 +13,7 @@ TradeIQ Stock App is a comprehensive stock market trading platform designed to p
 - Profile Management: Manage user profiles, watchlists, and trading history.
 - News Section: Stay updated with the latest news in Forex, Cryptos, and more.
 - Economic Calendars: Keep track of important economic events and announcements.
+- Search any stock and research about this stock
 
 # Technology Stack
 

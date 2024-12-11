@@ -196,4 +196,7 @@ class API {
       throw Exception('Failed to load data');
     }
   }
+
+  //Get Stock inside 
+  Future<StockData> getStockInside({required String ticker}) async {}
 }

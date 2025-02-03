@@ -198,5 +198,14 @@ class API {
   }
 
   //Get Stock inside 
-  Future<StockData> getStockInside({required String ticker}) async {}
+  Future<StockData> getStockInside({required String ticker}) async {
+    final response = await http.get(Uri.parse(
+        'https://www.alphavantage.co/query?function=OVERVIEW&symbol=$ticker&apikey=$apiAlpha'));
+        if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonData = json.decode(response.body);
+      return StockData.fromJson(jsonData);
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
 }
